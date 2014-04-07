@@ -4391,7 +4391,6 @@ int tcp_send_rcvq(struct sock *sk, struct msghdr *msg, size_t size)
 
 	err = skb_copy_datagram_iovec(skb, 0, msg->msg_iov, size);
 	if (err)
-		goto err_free;
 
 	TCP_SKB_CB(skb)->seq = tcp_sk(sk)->rcv_nxt;
 	TCP_SKB_CB(skb)->end_seq = TCP_SKB_CB(skb)->seq + size;
