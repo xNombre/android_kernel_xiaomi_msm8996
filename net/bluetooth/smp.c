@@ -1383,8 +1383,6 @@ static int smp_cmd_ident_addr_info(struct l2cap_conn *conn,
 
 	skb_pull(skb, sizeof(*info));
 
-	hci_dev_lock(hcon->hdev);
-
 	/* Strictly speaking the Core Specification (4.1) allows sending
 	 * an empty address which would force us to rely on just the IRK
 	 * as "identity information". However, since such
@@ -1416,8 +1414,6 @@ distribute:
 	if (!(smp->remote_key_dist & KEY_DIST_MASK))
 		smp_distribute_keys(smp);
 
-	hci_dev_unlock(hcon->hdev);
-
 	return 0;
 }
 
@@ -1426,7 +1422,6 @@ static int smp_cmd_sign_info(struct l2cap_conn *conn, struct sk_buff *skb)
 	struct smp_cmd_sign_info *rp = (void *) skb->data;
 	struct l2cap_chan *chan = conn->smp;
 	struct smp_chan *smp = chan->data;
-	struct hci_dev *hdev = conn->hcon->hdev;
 	struct smp_csrk *csrk;
 
 	BT_DBG("conn %pK", conn);
@@ -1439,7 +1434,6 @@ static int smp_cmd_sign_info(struct l2cap_conn *conn, struct sk_buff *skb)
 
 	skb_pull(skb, sizeof(*rp));
 
-	hci_dev_lock(hdev);
 	csrk = kzalloc(sizeof(*csrk), GFP_KERNEL);
 	if (csrk) {
 		csrk->master = 0x01;
@@ -1447,7 +1441,6 @@ static int smp_cmd_sign_info(struct l2cap_conn *conn, struct sk_buff *skb)
 	}
 	smp->csrk = csrk;
 	smp_distribute_keys(smp);
-	hci_dev_unlock(hdev);
 
 	return 0;
 }
