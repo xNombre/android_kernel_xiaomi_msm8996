@@ -74,8 +74,7 @@ int af_alg_release(struct socket *sock);
 void af_alg_release_parent(struct sock *sk);
 int af_alg_accept(struct sock *sk, struct socket *newsock);
 
-int af_alg_make_sg(struct af_alg_sgl *sgl, void __user *addr, int len,
-		   int write);
+int af_alg_make_sg(struct af_alg_sgl *sgl, struct iov_iter *iter, int len);
 void af_alg_free_sg(struct af_alg_sgl *sgl);
 
 int af_alg_cmsg_send(struct msghdr *msg, struct af_alg_control *con);
