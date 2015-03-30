@@ -647,7 +647,7 @@ static void *skcipher_bind(const char *name, u32 type, u32 mask)
 	struct skcipher_tfm *tfm;
 	struct crypto_ablkcipher *skcipher;
 
-	tfm = kzalloc(sizeof(*tfm), GFP_KERNEL);
+	tfm = kmalloc(sizeof(*tfm), GFP_KERNEL);
 	if (!tfm)
 		return ERR_PTR(-ENOMEM);
 
