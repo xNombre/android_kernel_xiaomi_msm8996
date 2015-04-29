@@ -15,4 +15,8 @@ typedef unsigned long uintptr_t;
 #define fdt64_to_cpu(x)		(x)
 #define cpu_to_fdt64(x)		(x)
 
+typedef __be16 fdt16_t;
+typedef __be32 fdt32_t;
+typedef __be64 fdt64_t;
+
 #endif /* _ARCH_POWERPC_BOOT_LIBFDT_ENV_H */
