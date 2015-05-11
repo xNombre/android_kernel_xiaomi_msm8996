@@ -141,6 +141,7 @@ struct crypto_hash;
 struct crypto_rng;
 struct crypto_tfm;
 struct crypto_type;
+struct aead_request;
 struct aead_givcrypt_request;
 struct skcipher_givcrypt_request;
 
@@ -162,32 +163,6 @@ struct ablkcipher_request {
 
 	void *info;
 
-	struct scatterlist *src;
-	struct scatterlist *dst;
-
-	void *__ctx[] CRYPTO_MINALIGN_ATTR;
-};
-
-/**
- *	struct aead_request - AEAD request
- *	@base: Common attributes for async crypto requests
- *	@assoclen: Length in bytes of associated data for authentication
- *	@cryptlen: Length of data to be encrypted or decrypted
- *	@iv: Initialisation vector
- *	@assoc: Associated data
- *	@src: Source data
- *	@dst: Destination data
- *	@__ctx: Start of private context data
- */
-struct aead_request {
-	struct crypto_async_request base;
-
-	unsigned int assoclen;
-	unsigned int cryptlen;
-
-	u8 *iv;
-
-	struct scatterlist *assoc;
 	struct scatterlist *src;
 	struct scatterlist *dst;
 
@@ -362,21 +337,6 @@ struct ablkcipher_tfm {
 	unsigned int reqsize;
 };
 
-struct aead_tfm {
-	int (*setkey)(struct crypto_aead *tfm, const u8 *key,
-	              unsigned int keylen);
-	int (*encrypt)(struct aead_request *req);
-	int (*decrypt)(struct aead_request *req);
-	int (*givencrypt)(struct aead_givcrypt_request *req);
-	int (*givdecrypt)(struct aead_givcrypt_request *req);
-
-	struct crypto_aead *base;
-
-	unsigned int ivsize;
-	unsigned int authsize;
-	unsigned int reqsize;
-};
-
 struct blkcipher_tfm {
 	void *iv;
 	int (*setkey)(struct crypto_tfm *tfm, const u8 *key,
@@ -422,7 +382,6 @@ struct rng_tfm {
 };
 
 #define crt_ablkcipher	crt_u.ablkcipher
-#define crt_aead	crt_u.aead
 #define crt_blkcipher	crt_u.blkcipher
 #define crt_cipher	crt_u.cipher
 #define crt_hash	crt_u.hash
@@ -435,7 +394,6 @@ struct crypto_tfm {
 	
 	union {
 		struct ablkcipher_tfm ablkcipher;
-		struct aead_tfm aead;
 		struct blkcipher_tfm blkcipher;
 		struct cipher_tfm cipher;
 		struct hash_tfm hash;
@@ -451,10 +409,6 @@ struct crypto_tfm {
 };
 
 struct crypto_ablkcipher {
-	struct crypto_tfm base;
-};
-
-struct crypto_aead {
 	struct crypto_tfm base;
 };
 
@@ -745,146 +699,6 @@ static inline void ablkcipher_request_set_crypt(
 	req->dst = dst;
 	req->nbytes = nbytes;
 	req->info = iv;
-}
-
-static inline struct crypto_aead *__crypto_aead_cast(struct crypto_tfm *tfm)
-{
-	return (struct crypto_aead *)tfm;
-}
-
-struct crypto_aead *crypto_alloc_aead(const char *alg_name, u32 type, u32 mask);
-
-static inline struct crypto_tfm *crypto_aead_tfm(struct crypto_aead *tfm)
-{
-	return &tfm->base;
-}
-
-static inline void crypto_free_aead(struct crypto_aead *tfm)
-{
-	crypto_free_tfm(crypto_aead_tfm(tfm));
-}
-
-static inline struct aead_tfm *crypto_aead_crt(struct crypto_aead *tfm)
-{
-	return &crypto_aead_tfm(tfm)->crt_aead;
-}
-
-static inline unsigned int crypto_aead_ivsize(struct crypto_aead *tfm)
-{
-	return crypto_aead_crt(tfm)->ivsize;
-}
-
-static inline unsigned int crypto_aead_authsize(struct crypto_aead *tfm)
-{
-	return crypto_aead_crt(tfm)->authsize;
-}
-
-static inline unsigned int crypto_aead_blocksize(struct crypto_aead *tfm)
-{
-	return crypto_tfm_alg_blocksize(crypto_aead_tfm(tfm));
-}
-
-static inline unsigned int crypto_aead_alignmask(struct crypto_aead *tfm)
-{
-	return crypto_tfm_alg_alignmask(crypto_aead_tfm(tfm));
-}
-
-static inline u32 crypto_aead_get_flags(struct crypto_aead *tfm)
-{
-	return crypto_tfm_get_flags(crypto_aead_tfm(tfm));
-}
-
-static inline void crypto_aead_set_flags(struct crypto_aead *tfm, u32 flags)
-{
-	crypto_tfm_set_flags(crypto_aead_tfm(tfm), flags);
-}
-
-static inline void crypto_aead_clear_flags(struct crypto_aead *tfm, u32 flags)
-{
-	crypto_tfm_clear_flags(crypto_aead_tfm(tfm), flags);
-}
-
-static inline int crypto_aead_setkey(struct crypto_aead *tfm, const u8 *key,
-				     unsigned int keylen)
-{
-	struct aead_tfm *crt = crypto_aead_crt(tfm);
-
-	return crt->setkey(crt->base, key, keylen);
-}
-
-int crypto_aead_setauthsize(struct crypto_aead *tfm, unsigned int authsize);
-
-static inline struct crypto_aead *crypto_aead_reqtfm(struct aead_request *req)
-{
-	return __crypto_aead_cast(req->base.tfm);
-}
-
-static inline int crypto_aead_encrypt(struct aead_request *req)
-{
-	return crypto_aead_crt(crypto_aead_reqtfm(req))->encrypt(req);
-}
-
-static inline int crypto_aead_decrypt(struct aead_request *req)
-{
-	return crypto_aead_crt(crypto_aead_reqtfm(req))->decrypt(req);
-}
-
-static inline unsigned int crypto_aead_reqsize(struct crypto_aead *tfm)
-{
-	return crypto_aead_crt(tfm)->reqsize;
-}
-
-static inline void aead_request_set_tfm(struct aead_request *req,
-					struct crypto_aead *tfm)
-{
-	req->base.tfm = crypto_aead_tfm(crypto_aead_crt(tfm)->base);
-}
-
-static inline struct aead_request *aead_request_alloc(struct crypto_aead *tfm,
-						      gfp_t gfp)
-{
-	struct aead_request *req;
-
-	req = kmalloc(sizeof(*req) + crypto_aead_reqsize(tfm), gfp);
-
-	if (likely(req))
-		aead_request_set_tfm(req, tfm);
-
-	return req;
-}
-
-static inline void aead_request_free(struct aead_request *req)
-{
-	kzfree(req);
-}
-
-static inline void aead_request_set_callback(struct aead_request *req,
-					     u32 flags,
-					     crypto_completion_t compl,
-					     void *data)
-{
-	req->base.complete = compl;
-	req->base.data = data;
-	req->base.flags = flags;
-}
-
-static inline void aead_request_set_crypt(struct aead_request *req,
-					  struct scatterlist *src,
-					  struct scatterlist *dst,
-					  unsigned int cryptlen, u8 *iv)
-{
-	req->src = src;
-	req->dst = dst;
-	req->cryptlen = cryptlen;
-	req->iv = iv;
-}
-
-static inline void aead_request_set_assoc(struct aead_request *req,
-					  struct scatterlist *assoc,
-					  unsigned int assoclen)
-{
-	req->assoc = assoc;
-	req->assoclen = assoclen;
 }
 
 static inline struct crypto_blkcipher *__crypto_blkcipher_cast(
