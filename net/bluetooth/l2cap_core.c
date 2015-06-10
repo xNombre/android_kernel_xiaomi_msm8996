@@ -1573,7 +1573,7 @@ int l2cap_register_user(struct l2cap_conn *conn, struct l2cap_user *user)
 
 	hci_dev_lock(hdev);
 
-	if (user->list.next || user->list.prev) {
+	if (!list_empty(&user->list)) {
 		ret = -EINVAL;
 		goto out_unlock;
 	}
@@ -1603,12 +1603,10 @@ void l2cap_unregister_user(struct l2cap_conn *conn, struct l2cap_user *user)
 
 	hci_dev_lock(hdev);
 
-	if (!user->list.next || !user->list.prev)
+	if (list_empty(&user->list))
 		goto out_unlock;
 
 	list_del(&user->list);
-	user->list.next = NULL;
-	user->list.prev = NULL;
 	user->remove(conn, user);
 
 out_unlock:
@@ -1623,8 +1621,6 @@ static void l2cap_unregister_all_users(struct l2cap_conn *conn)
 	while (!list_empty(&conn->users)) {
 		user = list_first_entry(&conn->users, struct l2cap_user, list);
 		list_del(&user->list);
-		user->list.next = NULL;
-		user->list.prev = NULL;
 		user->remove(conn, user);
 	}
 }
