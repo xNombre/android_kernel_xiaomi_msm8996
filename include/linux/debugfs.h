@@ -106,6 +106,12 @@ struct dentry *debugfs_create_u32_array(const char *name, umode_t mode,
 
 bool debugfs_initialized(void);
 
+ssize_t debugfs_read_file_bool(struct file *file, char __user *user_buf,
+			       size_t count, loff_t *ppos);
+
+ssize_t debugfs_write_file_bool(struct file *file, const char __user *user_buf,
+				size_t count, loff_t *ppos);
+
 #else
 
 #include <linux/err.h>
