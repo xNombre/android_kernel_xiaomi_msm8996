@@ -176,3 +176,11 @@ static inline void global_filetable_delayed_print(struct mount *mnt)
 }
 
 #endif /* CONFIG_FILE_TABLE_DEBUG */
+
+/*
+ * fs/ioctl.c
+ */
+extern int do_vfs_ioctl(struct file *file, unsigned int fd, unsigned int cmd,
+		    unsigned long arg);
+extern long vfs_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+
