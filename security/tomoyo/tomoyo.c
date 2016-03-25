@@ -157,7 +157,7 @@ static int tomoyo_inode_getattr(struct vfsmount *mnt, struct dentry *dentry)
  *
  * Returns 0 on success, negative value otherwise.
  */
-static int tomoyo_path_truncate(struct path *path)
+static int tomoyo_path_truncate(const struct path *path)
 {
 	return tomoyo_path_perm(TOMOYO_TYPE_TRUNCATE, path, NULL);
 }
