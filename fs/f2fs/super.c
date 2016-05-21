@@ -107,6 +107,8 @@ enum {
 	Opt_fault_injection,
 	Opt_usrquota,
 	Opt_grpquota,
+	Opt_lazytime,
+	Opt_nolazytime,
 	Opt_err,
 };
 
@@ -142,6 +144,8 @@ static match_table_t f2fs_tokens = {
 	{Opt_fault_injection, "fault_injection=%u"},
 	{Opt_usrquota, "usrquota"},
 	{Opt_grpquota, "grpquota"},
+	{Opt_lazytime, "lazytime"},
+	{Opt_nolazytime, "nolazytime"},
 	{Opt_err, NULL},
 };
 
@@ -389,6 +393,12 @@ static int parse_options(struct super_block *sb, char *options)
 					"quota operations not supported");
 			break;
 #endif
+		case Opt_lazytime:
+			sb->s_flags |= MS_LAZYTIME;
+			break;
+		case Opt_nolazytime:
+			sb->s_flags &= ~MS_LAZYTIME;
+			break;
 		default:
 			f2fs_msg(sb, KERN_ERR,
 				"Unrecognized mount option \"%s\" or missing value",
@@ -532,6 +542,9 @@ static void f2fs_dirty_inode(struct inode *inode, int flags)
 
 	if (inode->i_ino == F2FS_NODE_INO(sbi) ||
 			inode->i_ino == F2FS_META_INO(sbi))
+		return;
+
+	if (flags == I_DIRTY_TIME)
 		return;
 
 	if (is_inode_flag_set(inode, FI_AUTO_RECOVER))
@@ -823,6 +836,7 @@ static void default_options(struct f2fs_sb_info *sbi)
 	} else {
 		set_opt_mode(sbi, F2FS_MOUNT_ADAPTIVE);
 	}
+	sbi->sb->s_flags |= MS_LAZYTIME;
 
 #ifdef CONFIG_F2FS_FS_XATTR
 	set_opt(sbi, XATTR_USER);
