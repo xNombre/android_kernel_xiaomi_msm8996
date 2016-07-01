@@ -75,11 +75,12 @@ static int fill_read_buffer(struct dentry * dentry, struct configfs_buffer * buf
 		return -ENOMEM;
 
 	count = ops->show_attribute(item,attr,buffer->page);
-	buffer->needs_read_fill = 0;
+
 	BUG_ON(count > (ssize_t)SIMPLE_ATTR_SIZE);
-	if (count >= 0)
+	if (count >= 0) {
+		buffer->needs_read_fill = 0;
 		buffer->count = count;
-	else
+	} else
 		ret = count;
 	return ret;
 }
