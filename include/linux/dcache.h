@@ -306,7 +306,7 @@ static inline struct dentry *d_add_unique(struct dentry *entry, struct inode *in
 	return res;
 }
 
-extern void dentry_update_name_case(struct dentry *, struct qstr *);
+extern void dentry_update_name_case(struct dentry *, const struct qstr *);
 
 /* used for rename() and baskets */
 extern void d_move(struct dentry *, struct dentry *);
