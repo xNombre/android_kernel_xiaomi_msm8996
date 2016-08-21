@@ -32,6 +32,10 @@
 
 #include "tfa_config.h"
 
+#ifdef CONFIG_SOUND_CONTROL
+extern struct snd_soc_codec *tfa98xx_codec_ptr;
+#endif
+
 #define I2C_RETRIES 50
 #define I2C_RETRY_DELAY 5 /* ms */
 /* TODO: remove genregs usage? */
@@ -2593,6 +2597,9 @@ static int tfa98xx_probe(struct snd_soc_codec *codec)
 	INIT_DELAYED_WORK(&tfa98xx->tapdet_work, tfa98xx_tapdet_work);
 
 	tfa98xx->codec = codec;
+#ifdef CONFIG_SOUND_CONTROL
+	tfa98xx_codec_ptr = codec;
+#endif
 
 	ret = tfa98xx_load_container(tfa98xx);
 	pr_debug("Container loading requested: %d\n", ret);
