@@ -29,6 +29,8 @@ obj-$(CONFIG_SFI)		+= sfi/
 # was used and do nothing if so
 obj-$(CONFIG_PNP)		+= pnp/
 obj-y				+= amba/
+
+obj-y				+= clk/
 # Many drivers will want to use DMA so this has to be made available
 # really early.
 obj-$(CONFIG_DMADEVICES)	+= dma/
@@ -140,8 +142,6 @@ obj-$(CONFIG_VHOST_RING)	+= vhost/
 obj-$(CONFIG_VLYNQ)		+= vlynq/
 obj-$(CONFIG_STAGING)		+= staging/
 obj-y				+= platform/
-#common clk code
-obj-y				+= clk/
 
 obj-$(CONFIG_MAILBOX)		+= mailbox/
 obj-$(CONFIG_HWSPINLOCK)	+= hwspinlock/
