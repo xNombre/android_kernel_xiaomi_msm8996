@@ -108,7 +108,6 @@ extern int extra_free_kbytes;
 extern int min_free_order_shift;
 extern int pid_max_min, pid_max_max;
 extern int percpu_pagelist_fraction;
-extern int compat_log;
 extern int latencytop_enabled;
 extern int sysctl_nr_open_min, sysctl_nr_open_max;
 #ifndef CONFIG_MMU
@@ -1297,15 +1296,6 @@ static struct ctl_table kern_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
 		.extra1		= &neg_one,
-	},
-#endif
-#ifdef CONFIG_COMPAT
-	{
-		.procname	= "compat-log",
-		.data		= &compat_log,
-		.maxlen		= sizeof (int),
-	 	.mode		= 0644,
-		.proc_handler	= proc_dointvec,
 	},
 #endif
 #ifdef CONFIG_RT_MUTEXES
