@@ -273,7 +273,7 @@ int bt_sock_recvmsg(struct kiocb *iocb, struct socket *sock,
 	if (err == 0) {
 		sock_recv_ts_and_drops(msg, sk, skb);
 
-		if (bt_sk(sk)->skb_msg_name)
+		if (msg->msg_name && bt_sk(sk)->skb_msg_name)
 			bt_sk(sk)->skb_msg_name(skb, msg->msg_name,
 						&msg->msg_namelen);
 	}
