@@ -333,7 +333,6 @@ static struct crypto_instance *seqiv_alloc(struct rtattr **tb)
 	if (IS_ERR(inst))
 		goto put_rng;
 
-	inst->alg.cra_alignmask |= __alignof__(u32) - 1;
 	inst->alg.cra_ctxsize += sizeof(struct seqiv_ctx);
 
 out:

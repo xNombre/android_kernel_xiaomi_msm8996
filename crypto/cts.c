@@ -303,9 +303,6 @@ static struct crypto_instance *crypto_cts_alloc(struct rtattr **tb)
 	inst->alg.cra_alignmask = alg->cra_alignmask;
 	inst->alg.cra_type = &crypto_blkcipher_type;
 
-	/* We access the data as u32s when xoring. */
-	inst->alg.cra_alignmask |= __alignof__(u32) - 1;
-
 	inst->alg.cra_blkcipher.ivsize = alg->cra_blocksize;
 	inst->alg.cra_blkcipher.min_keysize = alg->cra_blkcipher.min_keysize;
 	inst->alg.cra_blkcipher.max_keysize = alg->cra_blkcipher.max_keysize;
