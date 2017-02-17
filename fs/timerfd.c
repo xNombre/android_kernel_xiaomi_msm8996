@@ -402,9 +402,9 @@ SYSCALL_DEFINE2(timerfd_create, int, clockid, int, flags)
 	     clockid != CLOCK_POWEROFF_ALARM))
 		return -EINVAL;
 
-	if (!capable(CAP_WAKE_ALARM) &&
-	    (clockid == CLOCK_REALTIME_ALARM ||
-	     clockid == CLOCK_BOOTTIME_ALARM))
+	if ((clockid == CLOCK_REALTIME_ALARM ||
+	     clockid == CLOCK_BOOTTIME_ALARM) &&
+	    !capable(CAP_WAKE_ALARM))
 		return -EPERM;
 
 	ctx = kzalloc(sizeof(*ctx), GFP_KERNEL);
@@ -450,7 +450,7 @@ static int do_timerfd_settime(int ufd, int flags,
 		return ret;
 	ctx = f.file->private_data;
 
-	if (!capable(CAP_WAKE_ALARM) && isalarm(ctx)) {
+	if (isalarm(ctx) && !capable(CAP_WAKE_ALARM)) {
 		fdput(f);
 		return -EPERM;
 	}
