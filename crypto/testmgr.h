@@ -37,9 +37,9 @@
 
 struct hash_testvec {
 	/* only used with keyed hash algorithms */
-	char *key;
-	char *plaintext;
-	char *digest;
+	const char *key;
+	const char *plaintext;
+	const char *digest;
 	unsigned char tap[MAX_TAP];
 	unsigned short psize;
 	unsigned char np;
@@ -47,10 +47,10 @@ struct hash_testvec {
 };
 
 struct cipher_testvec {
-	char *key;
-	char *iv;
-	char *input;
-	char *result;
+	const char *key;
+	const char *iv;
+	const char *input;
+	const char *result;
 	unsigned short tap[MAX_TAP];
 	int np;
 	unsigned char also_non_np;
@@ -62,11 +62,11 @@ struct cipher_testvec {
 };
 
 struct aead_testvec {
-	char *key;
-	char *iv;
-	char *input;
-	char *assoc;
-	char *result;
+	const char *key;
+	const char *iv;
+	const char *input;
+	const char *assoc;
+	const char *result;
 	unsigned char tap[MAX_TAP];
 	unsigned char atap[MAX_TAP];
 	int np;
@@ -81,10 +81,10 @@ struct aead_testvec {
 };
 
 struct cprng_testvec {
-	char *key;
-	char *dt;
-	char *v;
-	char *result;
+	const char *key;
+	const char *dt;
+	const char *v;
+	const char *result;
 	unsigned char klen;
 	unsigned short dtlen;
 	unsigned short vlen;
@@ -93,28 +93,28 @@ struct cprng_testvec {
 };
 
 struct drbg_testvec {
-	unsigned char *entropy;
+	const unsigned char *entropy;
 	size_t entropylen;
-	unsigned char *entpra;
-	unsigned char *entprb;
+	const unsigned char *entpra;
+	const unsigned char *entprb;
 	size_t entprlen;
-	unsigned char *addtla;
-	unsigned char *addtlb;
+	const unsigned char *addtla;
+	const unsigned char *addtlb;
 	size_t addtllen;
-	unsigned char *pers;
+	const unsigned char *pers;
 	size_t perslen;
-	unsigned char *expected;
+	const unsigned char *expected;
 	size_t expectedlen;
 };
 
-static char zeroed_string[48];
+static const char zeroed_string[48];
 
 /*
  * MD4 test vectors from RFC1320
  */
 #define MD4_TEST_VECTORS	7
 
-static struct hash_testvec md4_tv_template [] = {
+static const struct hash_testvec md4_tv_template [] = {
 	{
 		.plaintext = "",
 		.digest	= "\x31\xd6\xcf\xe0\xd1\x6a\xe9\x31"
@@ -160,7 +160,7 @@ static struct hash_testvec md4_tv_template [] = {
  */
 #define MD5_TEST_VECTORS	7
 
-static struct hash_testvec md5_tv_template[] = {
+static const struct hash_testvec md5_tv_template[] = {
 	{
 		.digest	= "\xd4\x1d\x8c\xd9\x8f\x00\xb2\x04"
 			  "\xe9\x80\x09\x98\xec\xf8\x42\x7e",
@@ -206,7 +206,7 @@ static struct hash_testvec md5_tv_template[] = {
  */
 #define RMD128_TEST_VECTORS     10
 
-static struct hash_testvec rmd128_tv_template[] = {
+static const struct hash_testvec rmd128_tv_template[] = {
 	{
 		.digest	= "\xcd\xf2\x62\x13\xa1\x50\xdc\x3e"
 			  "\xcb\x61\x0f\x18\xf6\xb3\x8b\x46",
@@ -270,7 +270,7 @@ static struct hash_testvec rmd128_tv_template[] = {
  */
 #define RMD160_TEST_VECTORS     10
 
-static struct hash_testvec rmd160_tv_template[] = {
+static const struct hash_testvec rmd160_tv_template[] = {
 	{
 		.digest	= "\x9c\x11\x85\xa5\xc5\xe9\xfc\x54\x61\x28"
 			  "\x08\x97\x7e\xe8\xf5\x48\xb2\x25\x8d\x31",
@@ -334,7 +334,7 @@ static struct hash_testvec rmd160_tv_template[] = {
  */
 #define RMD256_TEST_VECTORS     8
 
-static struct hash_testvec rmd256_tv_template[] = {
+static const struct hash_testvec rmd256_tv_template[] = {
 	{
 		.digest	= "\x02\xba\x4c\x4e\x5f\x8e\xcd\x18"
 			  "\x77\xfc\x52\xd6\x4d\x30\xe3\x7a"
@@ -402,7 +402,7 @@ static struct hash_testvec rmd256_tv_template[] = {
  */
 #define RMD320_TEST_VECTORS     8
 
-static struct hash_testvec rmd320_tv_template[] = {
+static const struct hash_testvec rmd320_tv_template[] = {
 	{
 		.digest	= "\x22\xd6\x5d\x56\x61\x53\x6c\xdc\x75\xc1"
 			  "\xfd\xf5\xc6\xde\x7b\x41\xb9\xf2\x73\x25"
@@ -466,7 +466,7 @@ static struct hash_testvec rmd320_tv_template[] = {
 };
 
 #define CRCT10DIF_TEST_VECTORS	ARRAY_SIZE(crct10dif_tv_template)
-static struct hash_testvec crct10dif_tv_template[] = {
+static const struct hash_testvec crct10dif_tv_template[] = {
 	{
 		.plaintext	= "abc",
 		.psize		= 3,
@@ -518,7 +518,7 @@ static struct hash_testvec crct10dif_tv_template[] = {
  */
 #define SHA1_TEST_VECTORS	6
 
-static struct hash_testvec sha1_tv_template[] = {
+static const struct hash_testvec sha1_tv_template[] = {
 	{
 		.plaintext = "",
 		.psize	= 0,
@@ -710,7 +710,7 @@ static struct hash_testvec sha1_tv_template[] = {
  */
 #define SHA224_TEST_VECTORS     5
 
-static struct hash_testvec sha224_tv_template[] = {
+static const struct hash_testvec sha224_tv_template[] = {
 	{
 		.plaintext = "",
 		.psize	= 0,
@@ -884,7 +884,7 @@ static struct hash_testvec sha224_tv_template[] = {
  */
 #define SHA256_TEST_VECTORS	5
 
-static struct hash_testvec sha256_tv_template[] = {
+static const struct hash_testvec sha256_tv_template[] = {
 	{
 		.plaintext = "",
 		.psize	= 0,
@@ -1057,7 +1057,7 @@ static struct hash_testvec sha256_tv_template[] = {
  */
 #define SHA384_TEST_VECTORS	6
 
-static struct hash_testvec sha384_tv_template[] = {
+static const struct hash_testvec sha384_tv_template[] = {
 	{
 		.plaintext = "",
 		.psize	= 0,
@@ -1251,7 +1251,7 @@ static struct hash_testvec sha384_tv_template[] = {
  */
 #define SHA512_TEST_VECTORS	6
 
-static struct hash_testvec sha512_tv_template[] = {
+static const struct hash_testvec sha512_tv_template[] = {
 	{
 		.plaintext = "",
 		.psize	= 0,
@@ -1460,7 +1460,7 @@ static struct hash_testvec sha512_tv_template[] = {
  */
 #define WP512_TEST_VECTORS	8
 
-static struct hash_testvec wp512_tv_template[] = {
+static const struct hash_testvec wp512_tv_template[] = {
 	{
 		.plaintext = "",
 		.psize	= 0,
@@ -1558,7 +1558,7 @@ static struct hash_testvec wp512_tv_template[] = {
 
 #define WP384_TEST_VECTORS	8
 
-static struct hash_testvec wp384_tv_template[] = {
+static const struct hash_testvec wp384_tv_template[] = {
 	{
 		.plaintext = "",
 		.psize	= 0,
@@ -1640,7 +1640,7 @@ static struct hash_testvec wp384_tv_template[] = {
 
 #define WP256_TEST_VECTORS	8
 
-static struct hash_testvec wp256_tv_template[] = {
+static const struct hash_testvec wp256_tv_template[] = {
 	{
 		.plaintext = "",
 		.psize	= 0,
@@ -1709,7 +1709,7 @@ static struct hash_testvec wp256_tv_template[] = {
  */
 #define TGR192_TEST_VECTORS	6
 
-static struct hash_testvec tgr192_tv_template[] = {
+static const struct hash_testvec tgr192_tv_template[] = {
 	{
 		.plaintext = "",
 		.psize	= 0,
@@ -1754,7 +1754,7 @@ static struct hash_testvec tgr192_tv_template[] = {
 
 #define TGR160_TEST_VECTORS	6
 
-static struct hash_testvec tgr160_tv_template[] = {
+static const struct hash_testvec tgr160_tv_template[] = {
 	{
 		.plaintext = "",
 		.psize	= 0,
@@ -1799,7 +1799,7 @@ static struct hash_testvec tgr160_tv_template[] = {
 
 #define TGR128_TEST_VECTORS	6
 
-static struct hash_testvec tgr128_tv_template[] = {
+static const struct hash_testvec tgr128_tv_template[] = {
 	{
 		.plaintext = "",
 		.psize	= 0,
@@ -1838,7 +1838,7 @@ static struct hash_testvec tgr128_tv_template[] = {
 
 #define GHASH_TEST_VECTORS 6
 
-static struct hash_testvec ghash_tv_template[] =
+static const struct hash_testvec ghash_tv_template[] =
 {
 	{
 		.key	= "\xdf\xa6\xbf\x4d\xed\x81\xdb\x03"
@@ -1955,7 +1955,7 @@ static struct hash_testvec ghash_tv_template[] =
  */
 #define HMAC_MD5_TEST_VECTORS	7
 
-static struct hash_testvec hmac_md5_tv_template[] =
+static const struct hash_testvec hmac_md5_tv_template[] =
 {
 	{
 		.key	= "\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b",
@@ -2037,7 +2037,7 @@ static struct hash_testvec hmac_md5_tv_template[] =
  */
 #define HMAC_RMD128_TEST_VECTORS	7
 
-static struct hash_testvec hmac_rmd128_tv_template[] = {
+static const struct hash_testvec hmac_rmd128_tv_template[] = {
 	{
 		.key	= "\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b",
 		.ksize	= 16,
@@ -2118,7 +2118,7 @@ static struct hash_testvec hmac_rmd128_tv_template[] = {
  */
 #define HMAC_RMD160_TEST_VECTORS	7
 
-static struct hash_testvec hmac_rmd160_tv_template[] = {
+static const struct hash_testvec hmac_rmd160_tv_template[] = {
 	{
 		.key	= "\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b",
 		.ksize	= 20,
@@ -2199,7 +2199,7 @@ static struct hash_testvec hmac_rmd160_tv_template[] = {
  */
 #define HMAC_SHA1_TEST_VECTORS	7
 
-static struct hash_testvec hmac_sha1_tv_template[] = {
+static const struct hash_testvec hmac_sha1_tv_template[] = {
 	{
 		.key	= "\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b",
 		.ksize	= 20,
@@ -2282,7 +2282,7 @@ static struct hash_testvec hmac_sha1_tv_template[] = {
  */
 #define HMAC_SHA224_TEST_VECTORS    4
 
-static struct hash_testvec hmac_sha224_tv_template[] = {
+static const struct hash_testvec hmac_sha224_tv_template[] = {
 	{
 		.key    = "\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b"
 			"\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b"
@@ -2397,7 +2397,7 @@ static struct hash_testvec hmac_sha224_tv_template[] = {
  */
 #define HMAC_SHA256_TEST_VECTORS	10
 
-static struct hash_testvec hmac_sha256_tv_template[] = {
+static const struct hash_testvec hmac_sha256_tv_template[] = {
 	{
 		.key	= "\x01\x02\x03\x04\x05\x06\x07\x08"
 			  "\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10"
@@ -2534,7 +2534,7 @@ static struct hash_testvec hmac_sha256_tv_template[] = {
 
 #define CMAC_AES_TEST_VECTORS 6
 
-static struct hash_testvec aes_cmac128_tv_template[] = {
+static const struct hash_testvec aes_cmac128_tv_template[] = {
 	{ /* From NIST Special Publication 800-38B, AES-128 */
 		.key		= "\x2b\x7e\x15\x16\x28\xae\xd2\xa6"
 				  "\xab\xf7\x15\x88\x09\xcf\x4f\x3c",
@@ -2611,7 +2611,7 @@ static struct hash_testvec aes_cmac128_tv_template[] = {
 
 #define CMAC_DES3_EDE_TEST_VECTORS 4
 
-static struct hash_testvec des3_ede_cmac64_tv_template[] = {
+static const struct hash_testvec des3_ede_cmac64_tv_template[] = {
 /*
  * From NIST Special Publication 800-38B, Three Key TDEA
  * Corrected test vectors from:
@@ -2659,7 +2659,7 @@ static struct hash_testvec des3_ede_cmac64_tv_template[] = {
 
 #define XCBC_AES_TEST_VECTORS 6
 
-static struct hash_testvec aes_xcbc128_tv_template[] = {
+static const struct hash_testvec aes_xcbc128_tv_template[] = {
 	{
 		.key	= "\x00\x01\x02\x03\x04\x05\x06\x07"
 			  "\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f",
@@ -2754,7 +2754,7 @@ static char vmac_string6[129] = {'p', 't', '*', '7', 'l',
 				 'i', '!', '#', 'w', '0',
 				 'z', '/', '4', 'A', 'n'};
 
-static struct hash_testvec aes_vmac128_tv_template[] = {
+static const struct hash_testvec aes_vmac128_tv_template[] = {
 	{
 		.key	= "\x00\x01\x02\x03\x04\x05\x06\x07"
 			  "\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f",
@@ -2834,7 +2834,7 @@ static struct hash_testvec aes_vmac128_tv_template[] = {
 
 #define HMAC_SHA384_TEST_VECTORS	4
 
-static struct hash_testvec hmac_sha384_tv_template[] = {
+static const struct hash_testvec hmac_sha384_tv_template[] = {
 	{
 		.key	= "\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b"
 			  "\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b"
@@ -2934,7 +2934,7 @@ static struct hash_testvec hmac_sha384_tv_template[] = {
 
 #define HMAC_SHA512_TEST_VECTORS	4
 
-static struct hash_testvec hmac_sha512_tv_template[] = {
+static const struct hash_testvec hmac_sha512_tv_template[] = {
 	{
 		.key	= "\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b"
 			  "\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b"
@@ -28971,7 +28971,7 @@ static struct comp_testvec lzo_decomp_tv_template[] = {
  */
 #define MICHAEL_MIC_TEST_VECTORS 6
 
-static struct hash_testvec michael_mic_tv_template[] = {
+static const struct hash_testvec michael_mic_tv_template[] = {
 	{
 		.key = "\x00\x00\x00\x00\x00\x00\x00\x00",
 		.ksize = 8,
@@ -29021,7 +29021,7 @@ static struct hash_testvec michael_mic_tv_template[] = {
  */
 #define CRC32_TEST_VECTORS 14
 
-static struct hash_testvec crc32_tv_template[] = {
+static const struct hash_testvec crc32_tv_template[] = {
 	{
 		.key = "\x87\xa9\xcb\xed",
 		.ksize = 4,
@@ -29455,7 +29455,7 @@ static struct hash_testvec crc32_tv_template[] = {
  */
 #define CRC32C_TEST_VECTORS 15
 
-static struct hash_testvec crc32c_tv_template[] = {
+static const struct hash_testvec crc32c_tv_template[] = {
 	{
 		.psize = 0,
 		.digest = "\x00\x00\x00\x00",
@@ -29893,7 +29893,7 @@ static struct hash_testvec crc32c_tv_template[] = {
  */
 #define BFIN_CRC_TEST_VECTORS 6
 
-static struct hash_testvec bfin_crc_tv_template[] = {
+static const struct hash_testvec bfin_crc_tv_template[] = {
 	{
 		.psize = 0,
 		.digest = "\x00\x00\x00\x00",
