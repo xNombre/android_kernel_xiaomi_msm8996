@@ -367,8 +367,7 @@ void unix_gc(void)
 	list_for_each_entry(u, &gc_candidates, link)
 		scan_children(&u->sk, inc_inflight, &hitlist);
 
-	/*
-	 * not_cycle_list contains those sockets which do not make up a
+	/* not_cycle_list contains those sockets which do not make up a
 	 * cycle.  Restore these to the inflight list.
 	 */
 	while (!list_empty(&not_cycle_list)) {
