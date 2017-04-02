@@ -73,16 +73,16 @@ static int setkey(struct crypto_tfm *parent, const u8 *key,
 }
 
 struct sinfo {
-	be128 *t;
+	le128 *t;
 	struct crypto_tfm *tfm;
 	void (*fn)(struct crypto_tfm *, u8 *, const u8 *);
 };
 
 static inline void xts_round(struct sinfo *s, void *dst, const void *src)
 {
-	be128_xor(dst, s->t, src);		/* PP <- T xor P */
+	le128_xor(dst, s->t, src);		/* PP <- T xor P */
 	s->fn(s->tfm, dst, dst);		/* CC <- E(Key1,PP) */
-	be128_xor(dst, dst, s->t);		/* C <- T xor CC */
+	le128_xor(dst, dst, s->t);		/* C <- T xor CC */
 }
 
 static int crypt(struct blkcipher_desc *d,
@@ -104,7 +104,7 @@ static int crypt(struct blkcipher_desc *d,
 	if (!w->nbytes)
 		return err;
 
-	s.t = (be128 *)w->iv;
+	s.t = (le128 *)w->iv;
 	avail = w->nbytes;
 
 	wsrc = w->src.virt.addr;
@@ -169,8 +169,8 @@ int xts_crypt(struct blkcipher_desc *desc, struct scatterlist *sdst,
 	const unsigned int max_blks = req->tbuflen / bsize;
 	struct blkcipher_walk walk;
 	unsigned int nblocks;
-	be128 *src, *dst, *t;
-	be128 *t_buf = req->tbuf;
+	le128 *src, *dst, *t;
+	le128 *t_buf = req->tbuf;
 	int err, i;
 
 	BUG_ON(max_blks < 1);
@@ -183,8 +183,8 @@ int xts_crypt(struct blkcipher_desc *desc, struct scatterlist *sdst,
 		return err;
 
 	nblocks = min(nbytes / bsize, max_blks);
-	src = (be128 *)walk.src.virt.addr;
-	dst = (be128 *)walk.dst.virt.addr;
+	src = (le128 *)walk.src.virt.addr;
+	dst = (le128 *)walk.dst.virt.addr;
 
 	/* calculate first value of T */
 	req->tweak_fn(req->tweak_ctx, (u8 *)&t_buf[0], walk.iv);
@@ -200,7 +200,7 @@ first:
 				t = &t_buf[i];
 
 				/* PP <- T xor P */
-				be128_xor(dst + i, t, src + i);
+				le128_xor(dst + i, t, src + i);
 			}
 
 			/* CC <- E(Key2,PP) */
@@ -209,7 +209,7 @@ first:
 
 			/* C <- T xor CC */
 			for (i = 0; i < nblocks; i++)
-				be128_xor(dst + i, dst + i, &t_buf[i]);
+				le128_xor(dst + i, dst + i, &t_buf[i]);
 
 			src += nblocks;
 			dst += nblocks;
@@ -217,7 +217,7 @@ first:
 			nblocks = min(nbytes / bsize, max_blks);
 		} while (nblocks > 0);
 
-		*(be128 *)walk.iv = *t;
+		*(le128 *)walk.iv = *t;
 
 		err = blkcipher_walk_done(desc, &walk, nbytes);
 		nbytes = walk.nbytes;
@@ -225,8 +225,8 @@ first:
 			break;
 
 		nblocks = min(nbytes / bsize, max_blks);
-		src = (be128 *)walk.src.virt.addr;
-		dst = (be128 *)walk.dst.virt.addr;
+		src = (le128 *)walk.src.virt.addr;
+		dst = (le128 *)walk.dst.virt.addr;
 	}
 
 	return err;
