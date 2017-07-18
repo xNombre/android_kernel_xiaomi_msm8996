@@ -3562,7 +3562,6 @@ done:
 static void ffs_closed(struct ffs_data *ffs)
 {
 	struct ffs_dev *ffs_obj;
-	struct f_fs_opts *opts;
 
 	ENTER();
 	ffs_dev_lock();
@@ -3576,15 +3575,6 @@ static void ffs_closed(struct ffs_data *ffs)
 	if (test_and_clear_bit(FFS_FL_CALL_CLOSED_CALLBACK, &ffs->flags) &&
 	    ffs_obj->ffs_closed_callback)
 		ffs_obj->ffs_closed_callback(ffs);
-
-	if (ffs_obj->opts)
-		opts = ffs_obj->opts;
-	else
-		goto done;
-
-	if (opts->no_configfs || !opts->func_inst.group.cg_item.ci_parent
-	    || !atomic_read(&opts->func_inst.group.cg_item.ci_kref.refcount))
-		goto done;
 
 done:
 	ffs_dev_unlock();
