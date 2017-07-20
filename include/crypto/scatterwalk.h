@@ -35,10 +35,7 @@ static inline void scatterwalk_sg_chain(struct scatterlist *sg1, int num,
 
 static inline struct scatterlist *scatterwalk_sg_next(struct scatterlist *sg)
 {
-	if (sg_is_last(sg))
-		return NULL;
-
-	return (++sg)->length ? sg : sg_chain_ptr(sg);
+	return sg_next(sg);
 }
 
 static inline void scatterwalk_crypto_chain(struct scatterlist *head,
