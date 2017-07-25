@@ -938,7 +938,7 @@ static int _qcrypto_cra_aead_sha1_init(struct crypto_tfm *tfm)
 	int rc;
 	struct qcrypto_cipher_ctx *ctx = crypto_tfm_ctx(tfm);
 
-	tfm->crt_aead.reqsize = sizeof(struct qcrypto_cipher_req_ctx);
+	crypto_aead_set_reqsize(__crypto_aead_cast(tfm), sizeof(struct qcrypto_cipher_req_ctx));
 	rc = _qcrypto_cipher_cra_init(tfm);
 	ctx->auth_alg = QCE_HASH_SHA1_HMAC;
 	return rc;
@@ -949,7 +949,7 @@ static int _qcrypto_cra_aead_sha256_init(struct crypto_tfm *tfm)
 	int rc;
 	struct qcrypto_cipher_ctx *ctx = crypto_tfm_ctx(tfm);
 
-	tfm->crt_aead.reqsize = sizeof(struct qcrypto_cipher_req_ctx);
+	crypto_aead_set_reqsize(__crypto_aead_cast(tfm), sizeof(struct qcrypto_cipher_req_ctx));
 	rc = _qcrypto_cipher_cra_init(tfm);
 	ctx->auth_alg = QCE_HASH_SHA256_HMAC;
 	return rc;
@@ -961,7 +961,7 @@ static int _qcrypto_cra_aead_aes_sha1_init(struct crypto_tfm *tfm)
 	struct qcrypto_cipher_ctx *ctx = crypto_tfm_ctx(tfm);
 	struct crypto_priv *cp = &qcrypto_dev;
 
-	tfm->crt_aead.reqsize = sizeof(struct qcrypto_cipher_req_ctx);
+	crypto_aead_set_reqsize(__crypto_aead_cast(tfm), sizeof(struct qcrypto_cipher_req_ctx));
 	rc = _qcrypto_cipher_cra_init(tfm);
 	if (rc)
 		return rc;
@@ -992,7 +992,7 @@ static int _qcrypto_cra_aead_aes_sha256_init(struct crypto_tfm *tfm)
 	struct qcrypto_cipher_ctx *ctx = crypto_tfm_ctx(tfm);
 	struct crypto_priv *cp = &qcrypto_dev;
 
-	tfm->crt_aead.reqsize = sizeof(struct qcrypto_cipher_req_ctx);
+	crypto_aead_set_reqsize(__crypto_aead_cast(tfm), sizeof(struct qcrypto_cipher_req_ctx));
 	rc = _qcrypto_cipher_cra_init(tfm);
 	if (rc)
 		return rc;
@@ -1022,7 +1022,7 @@ static int _qcrypto_cra_aead_ccm_init(struct crypto_tfm *tfm)
 	int rc;
 	struct qcrypto_cipher_ctx *ctx = crypto_tfm_ctx(tfm);
 
-	tfm->crt_aead.reqsize = sizeof(struct qcrypto_cipher_req_ctx);
+	crypto_aead_set_reqsize(__crypto_aead_cast(tfm), sizeof(struct qcrypto_cipher_req_ctx));
 	rc = _qcrypto_cipher_cra_init(tfm);
 	ctx->auth_alg =  QCE_HASH_AES_CMAC;
 	return rc;
@@ -1033,7 +1033,7 @@ static int _qcrypto_cra_aead_rfc4309_ccm_init(struct crypto_tfm *tfm)
 	int rc;
 	struct qcrypto_cipher_ctx *ctx = crypto_tfm_ctx(tfm);
 
-	tfm->crt_aead.reqsize = sizeof(struct qcrypto_cipher_req_ctx);
+	crypto_aead_set_reqsize(__crypto_aead_cast(tfm), sizeof(struct qcrypto_cipher_req_ctx));
 	rc = _qcrypto_cipher_cra_init(tfm);
 	ctx->auth_alg =  QCE_HASH_AES_CMAC;
 	return rc;

@@ -15,6 +15,7 @@
 #include <linux/crypto.h>
 #include <linux/kernel.h>
 #include <crypto/hash.h>
+#include <crypto/aead.h>
 
 struct cryptd_ablkcipher {
 	struct crypto_ablkcipher base;
