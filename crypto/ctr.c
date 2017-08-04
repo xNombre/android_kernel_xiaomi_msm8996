@@ -181,15 +181,24 @@ static void crypto_ctr_exit_tfm(struct crypto_tfm *tfm)
 static struct crypto_instance *crypto_ctr_alloc(struct rtattr **tb)
 {
 	struct crypto_instance *inst;
+	struct crypto_attr_type *algt;
 	struct crypto_alg *alg;
+	u32 mask;
 	int err;
 
 	err = crypto_check_attr_type(tb, CRYPTO_ALG_TYPE_BLKCIPHER);
 	if (err)
 		return ERR_PTR(err);
 
-	alg = crypto_attr_alg(tb[1], CRYPTO_ALG_TYPE_CIPHER,
-				  CRYPTO_ALG_TYPE_MASK);
+	algt = crypto_get_attr_type(tb);
+	if (IS_ERR(algt))
+		return ERR_CAST(algt);
+
+	mask = CRYPTO_ALG_TYPE_MASK |
+		crypto_requires_off(algt->type, algt->mask,
+				    CRYPTO_ALG_NEED_FALLBACK);
+
+	alg = crypto_attr_alg(tb[1], CRYPTO_ALG_TYPE_CIPHER, mask);
 	if (IS_ERR(alg))
 		return ERR_CAST(alg);
 
@@ -340,6 +349,7 @@ static struct crypto_instance *crypto_rfc3686_alloc(struct rtattr **tb)
 	struct crypto_alg *alg;
 	struct crypto_skcipher_spawn *spawn;
 	const char *cipher_name;
+	u32 mask;
 	int err;
 
 	algt = crypto_get_attr_type(tb);
@@ -357,12 +367,15 @@ static struct crypto_instance *crypto_rfc3686_alloc(struct rtattr **tb)
 	if (!inst)
 		return ERR_PTR(-ENOMEM);
 
+
+	mask = crypto_requires_sync(algt->type, algt->mask) |
+		crypto_requires_off(algt->type, algt->mask,
+				    CRYPTO_ALG_NEED_FALLBACK);
+
 	spawn = crypto_instance_ctx(inst);
 
 	crypto_set_skcipher_spawn(spawn, inst);
-	err = crypto_grab_skcipher(spawn, cipher_name, 0,
-				   crypto_requires_sync(algt->type,
-							algt->mask));
+	err = crypto_grab_skcipher(spawn, cipher_name, 0, mask);
 	if (err)
 		goto err_free_inst;
 
