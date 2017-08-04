@@ -379,6 +379,11 @@ static inline int crypto_requires_sync(u32 type, u32 mask)
 	return (type ^ CRYPTO_ALG_ASYNC) & mask & CRYPTO_ALG_ASYNC;
 }
 
+static inline int crypto_requires_off(u32 type, u32 mask, u32 off)
+{
+	return (type ^ off) & mask & off;
+}
+
 noinline unsigned long __crypto_memneq(const void *a, const void *b, size_t size);
 
 /**
