@@ -18,6 +18,7 @@
 #include <linux/module.h>
 #include <linux/scatterlist.h>
 #include <linux/slab.h>
+#include <crypto/algapi.h>
 
 struct crypto_cbc_ctx {
 	struct crypto_cipher *child;
@@ -214,15 +215,25 @@ static void crypto_cbc_exit_tfm(struct crypto_tfm *tfm)
 static struct crypto_instance *crypto_cbc_alloc(struct rtattr **tb)
 {
 	struct crypto_instance *inst;
+	struct crypto_attr_type *algt;
 	struct crypto_alg *alg;
+	u32 mask;
 	int err;
 
 	err = crypto_check_attr_type(tb, CRYPTO_ALG_TYPE_BLKCIPHER);
 	if (err)
 		return ERR_PTR(err);
 
-	alg = crypto_get_attr_alg(tb, CRYPTO_ALG_TYPE_CIPHER,
-				  CRYPTO_ALG_TYPE_MASK);
+	algt = crypto_get_attr_type(tb);
+	err = PTR_ERR(algt);
+	if (IS_ERR(algt))
+		return ERR_PTR(err);
+
+	mask = CRYPTO_ALG_TYPE_MASK |
+		crypto_requires_off(algt->type, algt->mask,
+				    CRYPTO_ALG_NEED_FALLBACK);
+
+	alg = crypto_get_attr_alg(tb, CRYPTO_ALG_TYPE_CIPHER, mask);
 	if (IS_ERR(alg))
 		return ERR_CAST(alg);
 
