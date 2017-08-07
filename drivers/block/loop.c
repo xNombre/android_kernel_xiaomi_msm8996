@@ -1825,10 +1825,6 @@ static int __init loop_init(void)
 	struct loop_device *lo;
 	int err;
 
-	err = misc_register(&loop_misc);
-	if (err < 0)
-		return err;
-
 	part_shift = 0;
 	if (max_part > 0) {
 		part_shift = fls(max_part);
@@ -1846,12 +1842,12 @@ static int __init loop_init(void)
 
 	if ((1UL << part_shift) > DISK_MAX_PARTS) {
 		err = -EINVAL;
-		goto misc_out;
+		goto err_out;
 	}
 
 	if (max_loop > 1UL << (MINORBITS - part_shift)) {
 		err = -EINVAL;
-		goto misc_out;
+		goto err_out;
 	}
 
 	/*
@@ -1869,6 +1865,11 @@ static int __init loop_init(void)
 		nr = CONFIG_BLK_DEV_LOOP_MIN_COUNT;
 		range = 1UL << MINORBITS;
 	}
+
+	err = misc_register(&loop_misc);
+	if (err < 0)
+		goto err_out;
+
 
 	if (register_blkdev(LOOP_MAJOR, "loop")) {
 		err = -EIO;
@@ -1889,6 +1890,7 @@ static int __init loop_init(void)
 
 misc_out:
 	misc_deregister(&loop_misc);
+err_out:
 	return err;
 }
 
