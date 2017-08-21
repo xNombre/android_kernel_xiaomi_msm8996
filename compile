@@ -1,0 +1,30 @@
+#!/bin/bash
+
+TOOLCHAIN='../tc/bin/aarch64-linux-android-'
+ARCH=arm64
+DEFCONFIG=soda_gemini_defconfig
+CCACHE=1
+KERNEL_IMAGE="Image.gz-dtb"
+NAME=TheSodaKernel
+OUT=out_soda
+J=5
+
+#Clean
+rm package/zImage 2> /dev/null
+rm $OUT/arch/$ARCH/boot/$KERNEL_IMAGE 2> /dev/null
+rm package/$NAME.zip 2> /dev/null
+
+#Make defconfig
+make O=$OUT ARCH=$ARCH CROSS_COMPILE=$TOOLCHAIN -j$J $DEFCONFIG
+
+#Compile
+make O=$OUT ARCH=$ARCH CROSS_COMPILE=$TOOLCHAIN -j$J
+
+#Pack zip
+if [ -e $OUT/arch/$ARCH/boot/$KERNEL_IMAGE ]; then
+cp $OUT/arch/$ARCH/boot/$KERNEL_IMAGE package/zImage
+cd package
+zip -r9 $NAME.zip *
+else
+echo 'No boot image!'
+fi
