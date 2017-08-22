@@ -3,7 +3,7 @@
 
 ## AnyKernel setup
 # EDIFY properties
-kernel.string=The Soda-Upstream Kernel beta v1.0 by xNombre
+kernel.string=The Soda Kernel beta v1.0 by xNombre
 do.devicecheck=1
 do.initd=1
 do.modules=1
