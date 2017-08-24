@@ -1,9 +1,8 @@
 #!/bin/bash
 
-TOOLCHAIN="/media/andrzej/LOS/LineageOS/android/system/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-"
+TOOLCHAIN='/media/andrzej/LOS/LineageOS/android/system/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-'
 ARCH=arm64
 DEFCONFIG=gemini_defconfig
-CCACHE=1
 KERNEL_IMAGE="Image.gz-dtb"
 NAME=TheSodaKernel
 OUT=out
@@ -15,10 +14,10 @@ rm $OUT/arch/$ARCH/boot/$KERNEL_IMAGE 2> /dev/null
 rm package/$NAME.zip 2> /dev/null
 
 #Make defconfig
-make O=$OUT ARCH=$ARCH -j$J $DEFCONFIG
+make O=$OUT ARCH=$ARCH -j$J CROSS_COMPILE=$TOOLCHAIN $DEFCONFIG
 
 #Compile
-make O=$OUT ARCH=$ARCH -j$J
+make O=$OUT ARCH=$ARCH -j$J CROSS_COMPILE=$TOOLCHAIN
 
 #Pack zip
 if [ -e $OUT/arch/$ARCH/boot/$KERNEL_IMAGE ]; then
