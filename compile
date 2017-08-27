@@ -1,11 +1,12 @@
 #!/bin/bash
 
-TOOLCHAIN='/media/andrzej/LOS/LineageOS/android/system/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-'
+TOOLCHAIN='../tc/bin/aarch64-linux-android-'
 ARCH=arm64
-DEFCONFIG=gemini_defconfig
+DEFCONFIG=soda_gemini_defconfig
+CCACHE=1
 KERNEL_IMAGE="Image.gz-dtb"
 NAME=TheSodaKernel
-OUT=out
+OUT=out_soda
 J=5
 
 #Clean

@@ -98,7 +98,6 @@ x509.genkey
 all.config
 
 /out/
-/out_soda/
-/package/
 /tc/
 /working/
+/out_soda/
