@@ -34,7 +34,6 @@
 #include <linux/rculist.h>
 #include <linux/interrupt.h>
 #include <linux/genalloc.h>
-#include <linux/of_address.h>
 #include <linux/of_device.h>
 
 static inline size_t chunk_size(const struct gen_pool_chunk *chunk)
@@ -273,7 +272,7 @@ unsigned long gen_pool_alloc(struct gen_pool *pool, size_t size)
 	struct gen_pool_chunk *chunk;
 	unsigned long addr = 0;
 	int order = pool->min_alloc_order;
-	int nbits, start_bit = 0, end_bit, remain;
+	int nbits, start_bit, end_bit, remain;
 
 #ifndef CONFIG_ARCH_HAVE_NMI_SAFE_CMPXCHG
 	BUG_ON(in_nmi());
@@ -288,6 +287,7 @@ unsigned long gen_pool_alloc(struct gen_pool *pool, size_t size)
 		if (size > atomic_read(&chunk->avail))
 			continue;
 
+		start_bit = 0;
 		end_bit = chunk_size(chunk) >> order;
 retry:
 		start_bit = pool->algo(chunk->bits, end_bit, start_bit, nbits,
@@ -415,7 +415,7 @@ bool addr_in_gen_pool(struct gen_pool *pool, unsigned long start,
 			size_t size)
 {
 	bool found = false;
-	unsigned long end = start + size;
+	unsigned long end = start + size - 1;
 	struct gen_pool_chunk *chunk;
 
 	rcu_read_lock();
@@ -587,6 +587,8 @@ struct gen_pool *devm_gen_pool_create(struct device *dev, int min_alloc_order,
 	struct gen_pool **ptr, *pool;
 
 	ptr = devres_alloc(devm_gen_pool_release, sizeof(*ptr), GFP_KERNEL);
+	if (!ptr)
+		return NULL;
 
 	pool = gen_pool_create(min_alloc_order, nid);
 	if (pool) {

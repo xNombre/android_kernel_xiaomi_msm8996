@@ -34,7 +34,7 @@ struct kobject *block_depr;
 static DEFINE_SPINLOCK(ext_devt_lock);
 static DEFINE_IDR(ext_devt_idr);
 
-static struct device_type disk_type;
+static const struct device_type disk_type;
 
 static void disk_check_events(struct disk_events *ev,
 			      unsigned int *clearing_ptr);
@@ -662,7 +662,6 @@ void del_gendisk(struct gendisk *disk)
 
 	kobject_put(disk->part0.holder_dir);
 	kobject_put(disk->slave_dir);
-	disk->driverfs_dev = NULL;
 	if (!sysfs_deprecated)
 		sysfs_remove_link(block_depr, dev_name(disk_to_dev(disk)));
 	pm_runtime_set_memalloc_noio(disk_to_dev(disk), false);
@@ -1111,8 +1110,7 @@ static void disk_release(struct device *dev)
 	disk_release_events(disk);
 	kfree(disk->random);
 	disk_replace_part_tbl(disk, NULL);
-	free_part_stats(&disk->part0);
-	free_part_info(&disk->part0);
+	hd_free_part(&disk->part0);
 	if (disk->queue)
 		blk_put_queue(disk->queue);
 	kfree(disk);
@@ -1147,7 +1145,7 @@ static char *block_devnode(struct device *dev, umode_t *mode,
 	return NULL;
 }
 
-static struct device_type disk_type = {
+static const struct device_type disk_type = {
 	.name		= "disk",
 	.groups		= disk_attr_groups,
 	.release	= disk_release,
@@ -1303,7 +1301,11 @@ struct gendisk *alloc_disk_node(int minors, int node_id)
 		 * converted to make use of bd_mutex and sequence counters.
 		 */
 		seqcount_init(&disk->part0.nr_sects_seq);
-		hd_ref_init(&disk->part0);
+		if (hd_ref_init(&disk->part0)) {
+			hd_free_part(&disk->part0);
+			kfree(disk);
+			return NULL;
+		}
 
 		disk->minors = minors;
 		rand_initialize_disk(disk);

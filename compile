@@ -15,10 +15,10 @@ rm $OUT/arch/$ARCH/boot/$KERNEL_IMAGE 2> /dev/null
 rm package/$NAME.zip 2> /dev/null
 
 #Make defconfig
-make O=$OUT ARCH=$ARCH CROSS_COMPILE=$TOOLCHAIN -j$J $DEFCONFIG
+make O=$OUT ARCH=$ARCH -j$J CROSS_COMPILE=$TOOLCHAIN $DEFCONFIG
 
 #Compile
-make O=$OUT ARCH=$ARCH CROSS_COMPILE=$TOOLCHAIN -j$J
+make O=$OUT ARCH=$ARCH -j$J CROSS_COMPILE=$TOOLCHAIN
 
 #Pack zip
 if [ -e $OUT/arch/$ARCH/boot/$KERNEL_IMAGE ]; then

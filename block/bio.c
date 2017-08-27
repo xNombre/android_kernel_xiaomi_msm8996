@@ -902,7 +902,7 @@ int submit_bio_wait(int rw, struct bio *bio)
 	bio->bi_private = &ret;
 	bio->bi_end_io = submit_bio_wait_endio;
 	submit_bio(rw, bio);
-	wait_for_completion(&ret.event);
+	wait_for_completion_io(&ret.event);
 
 	return ret.error;
 }
@@ -1150,7 +1150,7 @@ struct bio *bio_copy_user_iov(struct request_queue *q,
 	int i, ret;
 	int nr_pages = 0;
 	unsigned int len = 0;
-	unsigned int offset = map_data ? map_data->offset & ~PAGE_MASK : 0;
+	unsigned int offset = map_data ? offset_in_page(map_data->offset) : 0;
 
 	for (i = 0; i < iov_count; i++) {
 		unsigned long uaddr;
@@ -1336,7 +1336,7 @@ static struct bio *__bio_map_user_iov(struct request_queue *q,
 			goto out_unmap;
 		}
 
-		offset = uaddr & ~PAGE_MASK;
+		offset = offset_in_page(uaddr);
 		for (j = cur_page; j < page_limit; j++) {
 			unsigned int bytes = PAGE_SIZE - offset;
 
@@ -1739,6 +1739,34 @@ void bio_check_pages_dirty(struct bio *bio)
 		bio_put(bio);
 	}
 }
+
+void generic_start_io_acct(int rw, unsigned long sectors,
+			   struct hd_struct *part)
+{
+	int cpu = part_stat_lock();
+
+	part_round_stats(cpu, part);
+	part_stat_inc(cpu, part, ios[rw]);
+	part_stat_add(cpu, part, sectors[rw], sectors);
+	part_inc_in_flight(part, rw);
+
+	part_stat_unlock();
+}
+EXPORT_SYMBOL(generic_start_io_acct);
+
+void generic_end_io_acct(int rw, struct hd_struct *part,
+			 unsigned long start_time)
+{
+	unsigned long duration = jiffies - start_time;
+	int cpu = part_stat_lock();
+
+	part_stat_add(cpu, part, ticks[rw], duration);
+	part_round_stats(cpu, part);
+	part_dec_in_flight(part, rw);
+
+	part_stat_unlock();
+}
+EXPORT_SYMBOL(generic_end_io_acct);
 
 #if ARCH_IMPLEMENTS_FLUSH_DCACHE_PAGE
 void bio_flush_dcache_pages(struct bio *bi)

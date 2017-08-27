@@ -284,7 +284,7 @@ int __bitmap_weight(const unsigned long *bitmap, unsigned int bits)
 }
 EXPORT_SYMBOL(__bitmap_weight);
 
-void bitmap_set(unsigned long *map, unsigned int start, int len)
+void __bitmap_set(unsigned long *map, unsigned int start, int len)
 {
 	unsigned long *p = map + BIT_WORD(start);
 	const unsigned int size = start + len;
@@ -303,9 +303,9 @@ void bitmap_set(unsigned long *map, unsigned int start, int len)
 		*p |= mask_to_set;
 	}
 }
-EXPORT_SYMBOL(bitmap_set);
+EXPORT_SYMBOL(__bitmap_set);
 
-void bitmap_clear(unsigned long *map, unsigned int start, int len)
+void __bitmap_clear(unsigned long *map, unsigned int start, int len)
 {
 	unsigned long *p = map + BIT_WORD(start);
 	const unsigned int size = start + len;
@@ -324,7 +324,7 @@ void bitmap_clear(unsigned long *map, unsigned int start, int len)
 		*p &= ~mask_to_clear;
 	}
 }
-EXPORT_SYMBOL(bitmap_clear);
+EXPORT_SYMBOL(__bitmap_clear);
 
 /*
  * bitmap_find_next_zero_area - find a contiguous aligned zero area
@@ -439,7 +439,8 @@ int __bitmap_parse(const char *buf, unsigned int buflen,
 
 	nchunks = nbits = totaldigits = c = 0;
 	do {
-		chunk = ndigits = 0;
+		chunk = 0;
+		ndigits = totaldigits;
 
 		/* Get the next chunk of the bitmap */
 		while (buflen) {
@@ -478,9 +479,9 @@ int __bitmap_parse(const char *buf, unsigned int buflen,
 				return -EOVERFLOW;
 
 			chunk = (chunk << 4) | hex_to_bin(c);
-			ndigits++; totaldigits++;
+			totaldigits++;
 		}
-		if (ndigits == 0)
+		if (ndigits == totaldigits)
 			return -EINVAL;
 		if (nchunks == 0 && chunk == 0)
 			continue;
@@ -596,28 +597,38 @@ EXPORT_SYMBOL(bitmap_scnlistprintf);
  * ranges.  Consecutively set bits are shown as two hyphen-separated
  * decimal numbers, the smallest and largest bit numbers set in
  * the range.
+ * Optionally each range can be postfixed to denote that only parts of it
+ * should be set. The range will divided to groups of specific size.
+ * From each group will be used only defined amount of bits.
+ * Syntax: range:used_size/group_size
+ * Example: 0-1023:2/256 ==> 0,1,256,257,512,513,768,769
  *
- * Returns 0 on success, -errno on invalid input strings.
- * Error values:
- *    %-EINVAL: second number in range smaller than first
- *    %-EINVAL: invalid character in string
- *    %-ERANGE: bit number specified too large for mask
+ * Returns: 0 on success, -errno on invalid input strings. Error values:
+ *
+ *   - ``-EINVAL``: second number in range smaller than first
+ *   - ``-EINVAL``: invalid character in string
+ *   - ``-ERANGE``: bit number specified too large for mask
  */
 static int __bitmap_parselist(const char *buf, unsigned int buflen,
 		int is_user, unsigned long *maskp,
 		int nmaskbits)
 {
-	unsigned a, b;
-	int c, old_c, totaldigits;
+	unsigned int a, b, old_a, old_b;
+	unsigned int group_size, used_size;
+	int c, old_c, totaldigits, ndigits;
 	const char __user __force *ubuf = (const char __user __force *)buf;
-	int at_start, in_range;
+	int at_start, in_range, in_partial_range;
 
 	totaldigits = c = 0;
+	old_a = old_b = 0;
+	group_size = used_size = 0;
 	bitmap_zero(maskp, nmaskbits);
 	do {
 		at_start = 1;
 		in_range = 0;
+		in_partial_range = 0;
 		a = b = 0;
+		ndigits = totaldigits;
 
 		/* Get the next cpu# or a range of cpu#'s */
 		while (buflen) {
@@ -631,23 +642,45 @@ static int __bitmap_parselist(const char *buf, unsigned int buflen,
 			if (isspace(c))
 				continue;
 
-			/*
-			 * If the last character was a space and the current
-			 * character isn't '\0', we've got embedded whitespace.
-			 * This is a no-no, so throw an error.
-			 */
-			if (totaldigits && c && isspace(old_c))
-				return -EINVAL;
-
 			/* A '\0' or a ',' signal the end of a cpu# or range */
 			if (c == '\0' || c == ',')
 				break;
+			/*
+			* whitespaces between digits are not allowed,
+			* but it's ok if whitespaces are on head or tail.
+			* when old_c is whilespace,
+			* if totaldigits == ndigits, whitespace is on head.
+			* if whitespace is on tail, it should not run here.
+			* as c was ',' or '\0',
+			* the last code line has broken the current loop.
+			*/
+			if ((totaldigits != ndigits) && isspace(old_c))
+				return -EINVAL;
+
+			if (c == '/') {
+				used_size = a;
+				at_start = 1;
+				in_range = 0;
+				a = b = 0;
+				continue;
+			}
+
+			if (c == ':') {
+				old_a = a;
+				old_b = b;
+				at_start = 1;
+				in_range = 0;
+				in_partial_range = 1;
+				a = b = 0;
+				continue;
+			}
 
 			if (c == '-') {
 				if (at_start || in_range)
 					return -EINVAL;
 				b = 0;
 				in_range = 1;
+				at_start = 1;
 				continue;
 			}
 
@@ -660,15 +693,33 @@ static int __bitmap_parselist(const char *buf, unsigned int buflen,
 			at_start = 0;
 			totaldigits++;
 		}
-		if (!(a <= b))
+		if (ndigits == totaldigits)
+			continue;
+		if (in_partial_range) {
+			group_size = a;
+			a = old_a;
+			b = old_b;
+			old_a = old_b = 0;
+		}
+		/* if no digit is after '-', it's wrong*/
+		if (at_start && in_range)
+			return -EINVAL;
+		if (!(a <= b) || !(used_size <= group_size))
 			return -EINVAL;
 		if (b >= nmaskbits)
 			return -ERANGE;
-		if (!at_start) {
-			while (a <= b) {
+		while (a <= b) {
+			if (in_partial_range) {
+				static int pos_in_group = 1;
+
+				if (pos_in_group <= used_size)
+					set_bit(a, maskp);
+
+				if (a == b || ++pos_in_group > group_size)
+					pos_in_group = 1;
+			} else
 				set_bit(a, maskp);
-				a++;
-			}
+			a++;
 		}
 	} while (buflen && c == ',');
 	return 0;
@@ -930,14 +981,16 @@ EXPORT_SYMBOL(bitmap_bitremap);
  *  11 was set in @orig had no affect on @dst.
  *
  * Example [2] for bitmap_fold() + bitmap_onto():
- *  Let's say @relmap has these ten bits set:
+ *  Let's say @relmap has these ten bits set::
+ *
  *		40 41 42 43 45 48 53 61 74 95
+ *
  *  (for the curious, that's 40 plus the first ten terms of the
  *  Fibonacci sequence.)
  *
  *  Further lets say we use the following code, invoking
  *  bitmap_fold() then bitmap_onto, as suggested above to
- *  avoid the possibility of an empty @dst result:
+ *  avoid the possibility of an empty @dst result::
  *
  *	unsigned long *tmp;	// a temporary bitmap's bits
  *
@@ -948,22 +1001,26 @@ EXPORT_SYMBOL(bitmap_bitremap);
  *  various @orig's.  I list the zero-based positions of each set bit.
  *  The tmp column shows the intermediate result, as computed by
  *  using bitmap_fold() to fold the @orig bitmap modulo ten
- *  (the weight of @relmap).
+ *  (the weight of @relmap):
  *
+ *      =============== ============== =================
  *      @orig           tmp            @dst
  *      0                0             40
  *      1                1             41
  *      9                9             95
- *      10               0             40 (*)
+ *      10               0             40 [#f1]_
  *      1 3 5 7          1 3 5 7       41 43 48 61
  *      0 1 2 3 4        0 1 2 3 4     40 41 42 43 45
  *      0 9 18 27        0 9 8 7       40 61 74 95
  *      0 10 20 30       0             40
  *      0 11 22 33       0 1 2 3       40 41 42 43
  *      0 12 24 36       0 2 4 6       40 42 45 53
- *      78 102 211       1 2 8         41 42 74 (*)
+ *      78 102 211       1 2 8         41 42 74 [#f1]_
+ *      =============== ============== =================
  *
- * (*) For these marked lines, if we hadn't first done bitmap_fold()
+ * .. [#f1]
+ *
+ *     For these marked lines, if we hadn't first done bitmap_fold()
  *     into tmp, then the @dst result would have been empty.
  *
  * If either of @orig or @relmap is empty (no set bits), then @dst
