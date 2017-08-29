@@ -96,3 +96,12 @@ x509.genkey
 
 # Kconfig presets
 all.config
+
+/out/
+/tc/
+/working/
+/out_soda/
+/compiled/
+*.old
+/package/zImage
+
