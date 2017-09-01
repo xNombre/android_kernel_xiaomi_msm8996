@@ -1,7 +1,7 @@
 VERSION = 3
 PATCHLEVEL = 18
 SUBLEVEL = 60
-EXTRAVERSION =TheSodaKernelv1.0
+EXTRAVERSION =TheSodaKernelv1.1
 NAME = Shuffling Zombie Juror
 
 # *DOCUMENTATION*
