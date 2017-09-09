@@ -3687,6 +3687,11 @@ static int smbchg_icl_loop_disable_check(struct smbchg_chip *chip)
 
 #define UNKNOWN_BATT_TYPE	"Unknown Battery"
 #define LOADING_BATT_TYPE	"Loading Battery Data"
+
+// Default current value
+static int fast_charge_max_ma = 3000;
+module_param(fast_charge_max_ma, int, 0644);
+
 static int smbchg_config_chg_battery_type(struct smbchg_chip *chip)
 {
 	int rc = 0, max_voltage_uv = 0, fastchg_ma = 0, ret = 0, iterm_ua = 0;
@@ -3771,13 +3776,25 @@ static int smbchg_config_chg_battery_type(struct smbchg_chip *chip)
 	 * Only configure from profile if fastchg-ma is not defined in the
 	 * charger device node.
 	 */
-	if (!of_find_property(chip->spmi->dev.of_node,
+	/*if (!of_find_property(chip->spmi->dev.of_node,
 				"qcom,fastchg-current-ma", NULL)) {
 		rc = of_property_read_u32(profile_node,
 				"qcom,fastchg-current-ma", &fastchg_ma);
 		if (rc) {
 			ret = rc;
-		} else {
+		} else {*/
+
+			//I bumped max mA here, but it's untested (and won't be)!!!
+			if(fast_charge_max_ma > 3500)
+				fast_charge_max_ma = 3500;
+			else if(fast_charge_max_ma < 900)
+				fast_charge_max_ma = 900;
+
+			if(fast_charge_max_ma > 3000)
+				 	pr_warning("You are using higher current value than stock maximum!! You were warned!!");
+ 
+			fastchg_ma = fast_charge_max_ma;
+
 			pr_smb(PR_MISC,
 				"fastchg-ma changed from to %dma for battery-type %s\n",
 				fastchg_ma, chip->battery_type);
@@ -3789,8 +3806,8 @@ static int smbchg_config_chg_battery_type(struct smbchg_chip *chip)
 					rc);
 				return rc;
 			}
-		}
-	}
+		/*}
+	}*/
 
 	return ret;
 }
