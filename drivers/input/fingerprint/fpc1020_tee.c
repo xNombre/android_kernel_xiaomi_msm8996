@@ -580,10 +580,12 @@ static int fpc1020_get_fp_id_tee(struct fpc1020_data *fpc1020)
 /* -------------------------------------------------------------------- */
 static int fpc1020_tee_remove(struct platform_device *pdev)
 {
+/*
 #ifdef CONFIG_FINGERPRINT_BOOST
 	if (fpc1020->input_dev != NULL)
 		input_free_device(fpc1020->input_dev);
 #endif
+*/
 
 	return 0;
 }
