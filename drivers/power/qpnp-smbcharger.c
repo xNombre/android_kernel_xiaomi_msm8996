@@ -1772,6 +1772,9 @@ static int smbchg_set_high_usb_chg_current(struct smbchg_chip *chip,
 	return rc;
 }
 
+static int fast_charge_min_ma = 500;
+module_param(fast_charge_min_ma, int, 0644);
+
 /* if APSD results are used
  *	if SDP is detected it will look at 500mA setting
  *		if set it will draw 500mA
@@ -1783,6 +1786,10 @@ static int smbchg_set_usb_current_max(struct smbchg_chip *chip,
 							int current_ma)
 {
 	int rc = 0;
+
+	// Validate fast charge param value 
+	if(fast_charge_min_ma > 900) fast_charge_min_ma = 900;
+	if(fast_charge_min_ma < 150) fast_charge_min_ma = 150;
 
 	/*
 	 * if the battery is not present, do not allow the usb ICL to lower in
@@ -1877,7 +1884,7 @@ static int smbchg_set_usb_current_max(struct smbchg_chip *chip,
 			}
 			chip->usb_max_current_ma = 150;
 		}
-		if (current_ma == CURRENT_500_MA) {
+		else if (current_ma == CURRENT_500_MA) {
 			rc = smbchg_sec_masked_write(chip,
 					chip->usb_chgpth_base + CHGPTH_CFG,
 					CFG_USB_2_3_SEL_BIT, CFG_USB_2);
@@ -1895,7 +1902,11 @@ static int smbchg_set_usb_current_max(struct smbchg_chip *chip,
 			}
 			chip->usb_max_current_ma = 500;
 		}
-		if (current_ma == CURRENT_900_MA) {
+		if ((current_ma == CURRENT_900_MA) || (current_ma == CURRENT_500_MA) || (current_ma == CURRENT_150_MA)) {
+
+			if(fast_charge_min_ma > current_ma)
+				break;
+
 			rc = smbchg_sec_masked_write(chip,
 					chip->usb_chgpth_base + CHGPTH_CFG,
 					CFG_USB_2_3_SEL_BIT, CFG_USB_3);
