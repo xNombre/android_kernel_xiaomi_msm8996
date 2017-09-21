@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TOOLCHAIN="/media/andrzej/LOS/LineageOS/android/system/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-"
+TOOLCHAIN="../aarch64-linux-android-4.9/bin/aarch64-linux-android-"
 ARCH=arm64
 DEFCONFIG=gemini_defconfig
 KERNEL_IMAGE="Image.gz-dtb"
