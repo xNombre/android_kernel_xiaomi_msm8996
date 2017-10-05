@@ -59,7 +59,7 @@ static DEFINE_SPINLOCK(suspend_lock);
 
 #define TAG "msm_adreno_tz: "
 
-#if 1
+#if CONFIG_ADRENO_BOOST
 static unsigned int adrenoboost = 0;
 #endif
 
@@ -97,7 +97,7 @@ u64 suspend_time_ms(void)
 	return time_diff;
 }
 
-#if 1
+#if CONFIG_ADRENO_BOOST
 static ssize_t adrenoboost_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
@@ -168,7 +168,7 @@ static ssize_t suspend_time_show(struct device *dev,
 	return snprintf(buf, PAGE_SIZE, "%llu\n", time_diff);
 }
 
-#if 1
+#if CONFIG_ADRENO_BOOST
 static DEVICE_ATTR(adrenoboost, 0644,
 		adrenoboost_show, adrenoboost_save);
 #endif
@@ -182,7 +182,7 @@ static DEVICE_ATTR(suspend_time, 0444,
 static const struct device_attribute *adreno_tz_attr_list[] = {
 		&dev_attr_gpu_load,
 		&dev_attr_suspend_time,
-#if 1
+#if CONFIG_ADRENO_BOOST
 		&dev_attr_adrenoboost,
 #endif
 		NULL
@@ -426,7 +426,7 @@ static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq,
 #endif
 
 	priv->bin.total_time += stats.total_time;
-#if 1
+#if CONFIG_ADRENO_BOOST
 	// scale busy time up based on adrenoboost parameter, only if MIN_BUSY exceeded...
 	if ((unsigned int)(priv->bin.busy_time + stats.busy_time) >= MIN_BUSY) {
 		priv->bin.busy_time += stats.busy_time * (1 + (adrenoboost*3)/2);
