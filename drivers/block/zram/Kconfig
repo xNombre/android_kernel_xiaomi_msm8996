@@ -1,7 +1,8 @@
 config ZRAM
 	tristate "Compressed RAM block device support"
 	depends on BLOCK && SYSFS && ZSMALLOC
-	select ZRAM_LZ4_COMPRESS
+	select LZO_COMPRESS
+	select LZO_DECOMPRESS
 	default n
 	help
 	  Creates virtual block devices called /dev/zramX (X = 0, 1, ...).
