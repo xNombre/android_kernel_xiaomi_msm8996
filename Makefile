@@ -308,8 +308,8 @@ GRAPHITE =
 endif
 
 ifdef CONFIG_SODA_SPARKLING_FLAGS
-HOSTCFLAGS   += -O3
-HOSTCXXFLAGS += -O3
+HOSTCFLAGS   += -O2 $(GRAPHITE) -fgcse-las -fgcse-sm
+HOSTCXXFLAGS += -O2 $(GRAPHITE) -fgcse-las -fgcse-sm
 else
 HOSTCFLAGS   += -O2
 HOSTCXXFLAGS += -O2
@@ -395,12 +395,12 @@ AFLAGS_KERNEL	=
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage -fno-tree-loop-im
 
 ifdef CONFIG_SODA_SPARKLING_FLAGS
-CFLAGS_MODULE   +=
-AFLAGS_MODULE   +=
-LDFLAGS_MODULE  +=
-CFLAGS_KERNEL	+=
-AFLAGS_KERNEL	+=
-CFLAGS_GCOV	+=
+CFLAGS_MODULE   += $(GRAPHITE)
+AFLAGS_MODULE   += $(GRAPHITE)
+LDFLAGS_MODULE  += $(GRAPHITE) -Wl,-O1
+CFLAGS_KERNEL	+= $(GRAPHITE)
+AFLAGS_KERNEL	+= $(GRAPHITE)
+CFLAGS_GCOV	+= $(GRAPHITE)
 endif
 
 
@@ -430,7 +430,9 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -std=gnu89
 
 ifdef CONFIG_SODA_SPARKLING_FLAGS
-KBUILD_CFLAGS += -march=armv8-a+simd+crypto+crc -mtune=cortex-a57.cortex-a53 -mcpu=cortex-a57.cortex-a53 -munaligned-access -marm
+KBUILD_CFLAGS += -march=armv8-a+simd+crypto+crc -mtune=cortex-a57.cortex-a53 -mcpu=cortex-a57.cortex-a53 -munaligned-access -marm \
+		 -fno-pic -ffast-math -fmodulo-sched -fforce-addr -fpredictive-commoning -fsingle-precision-constant $(GRAPHITE) \
+		 -fivopts -Wl,-O1 -mfpu=vfpv4
 
 # Kryo doesn't need 835769/843419 erratum fixes.
 # Some toolchains enable those fixes automatically, so opt-out.
@@ -664,7 +666,7 @@ KBUILD_CFLAGS	+= -O2 $(call cc-disable-warning,maybe-uninitialized,)
 endif
 
 ifdef CONFIG_SODA_SPARKLING_FLAGS
-KBUILD_CFLAGS	+= -O3 $(call cc-disable-warning,maybe-uninitialized,)
+KBUILD_CFLAGS	+= -O2 $(call cc-disable-warning,maybe-uninitialized,)
 endif
 
 # Tell gcc to never replace conditional load with a non-conditional one
