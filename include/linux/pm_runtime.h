@@ -30,6 +30,10 @@ static inline bool queue_pm_work(struct work_struct *work)
 {
 	return queue_work(pm_wq, work);
 }
+static inline bool pm_runtime_is_irq_safe(struct device *dev)
+{
+	return dev->power.irq_safe;
+}
 
 extern int pm_generic_runtime_suspend(struct device *dev);
 extern int pm_generic_runtime_resume(struct device *dev);
@@ -42,6 +46,7 @@ static inline int pm_generic_runtime_suspend(struct device *dev) { return 0; }
 static inline int pm_generic_runtime_resume(struct device *dev) { return 0; }
 static inline int pm_runtime_force_suspend(struct device *dev) { return 0; }
 static inline int pm_runtime_force_resume(struct device *dev) { return 0; }
+static inline bool pm_runtime_is_irq_safe(struct device *dev) { return false; }
 #endif
 
 #ifdef CONFIG_PM_RUNTIME
