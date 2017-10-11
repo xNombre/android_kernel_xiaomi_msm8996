@@ -80,7 +80,7 @@
 #endif
 
 #define MDSS_BRIGHT_TO_BL_DIM(out, v) do {\
-			out = (12*v*v+1393*v+3060)/4465;\
+			out = (((v) - 2) * 255 / 250);\
 			} while (0)
 bool backlight_dimmer = true;
 module_param(backlight_dimmer, bool, 0755);
@@ -283,7 +283,10 @@ static void mdss_fb_set_bl_brightness(struct led_classdev *led_cdev,
 		value = mfd->panel_info->brightness_max;
 
 	if (backlight_dimmer) {
-		MDSS_BRIGHT_TO_BL_DIM(bl_lvl, value);
+		if (value < 3)
+			bl_lvl = 1;
+		else
+			MDSS_BRIGHT_TO_BL_DIM(bl_lvl, value);
 	} else {
 		/* This maps android backlight level 0 to 255 into
 		   driver backlight level 0 to bl_max with rounding */
