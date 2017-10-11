@@ -17,6 +17,7 @@
 #include <linux/err.h>
 #include "sysfs.h"
 
+#define SYSFS_PREALLOC 010000
 
 static void remove_files(struct kernfs_node *parent,
 			 const struct attribute_group *grp)
