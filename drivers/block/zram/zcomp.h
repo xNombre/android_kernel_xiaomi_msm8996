@@ -51,7 +51,6 @@ struct zcomp {
 };
 
 ssize_t zcomp_available_show(const char *comp, char *buf);
-bool zcomp_available_algorithm(const char *comp);
 
 struct zcomp *zcomp_create(const char *comp, int max_strm);
 void zcomp_destroy(struct zcomp *comp);
@@ -67,4 +66,3 @@ int zcomp_decompress(struct zcomp *comp, const unsigned char *src,
 
 bool zcomp_set_max_streams(struct zcomp *comp, int num_strm);
 #endif /* _ZCOMP_H_ */
-

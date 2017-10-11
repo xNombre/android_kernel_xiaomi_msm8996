@@ -20,6 +20,12 @@
 
 #include "zcomp.h"
 
+/*
+ * Some arbitrary value. This is just to catch
+ * invalid value for num_devices module parameter.
+ */
+static const unsigned max_num_devices = 32;
+
 /*-- Configurable parameters */
 
 /*
@@ -115,10 +121,5 @@ struct zram {
 	 */
 	u64 disksize;	/* bytes */
 	char compressor[10];
-	/*
-	 * zram is claimed so open request will be failed
-	 */
-	bool claim; /* Protected by bdev->bd_mutex */
 };
 #endif
-
