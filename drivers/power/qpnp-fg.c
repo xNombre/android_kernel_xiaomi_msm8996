@@ -514,7 +514,6 @@ struct fg_chip {
 	struct fg_wakeup_source	gain_comp_wakeup_source;
 	struct fg_wakeup_source	capacity_learning_wakeup_source;
 	bool			first_profile_loaded;
-	struct fg_wakeup_source	update_sram_wakeup_source;
 	bool			fg_restarting;
 	bool			profile_loaded;
 	bool			soc_reporting_ready;
@@ -2552,7 +2551,6 @@ static int update_sram_data(struct fg_chip *chip, int *resched_ms)
 	int64_t temp;
 	int battid_valid = fg_is_batt_id_valid(chip);
 
-	fg_stay_awake(&chip->update_sram_wakeup_source);
 	if (chip->fg_restarting)
 		goto resched;
 
@@ -2663,7 +2661,6 @@ resched:
 		*resched_ms = SRAM_PERIOD_NO_ID_UPDATE_MS;
 	}
 out:
-	fg_relax(&chip->update_sram_wakeup_source);
 	return rc;
 }
 
@@ -7548,7 +7545,6 @@ static void fg_cleanup(struct fg_chip *chip)
 	wakeup_source_trash(&chip->resume_soc_wakeup_source.source);
 	wakeup_source_trash(&chip->empty_check_wakeup_source.source);
 	wakeup_source_trash(&chip->profile_wakeup_source.source);
-	wakeup_source_trash(&chip->update_sram_wakeup_source.source);
 	wakeup_source_trash(&chip->gain_comp_wakeup_source.source);
 	wakeup_source_trash(&chip->capacity_learning_wakeup_source.source);
 	wakeup_source_trash(&chip->esr_extract_wakeup_source.source);
@@ -8740,8 +8736,6 @@ static int fg_probe(struct spmi_device *spmi)
 			"qpnp_fg_empty_check");
 	wakeup_source_init(&chip->profile_wakeup_source.source,
 			"qpnp_fg_profile");
-	wakeup_source_init(&chip->update_sram_wakeup_source.source,
-			"qpnp_fg_update_sram");
 	wakeup_source_init(&chip->resume_soc_wakeup_source.source,
 			"qpnp_fg_set_resume_soc");
 	wakeup_source_init(&chip->gain_comp_wakeup_source.source,
@@ -8971,7 +8965,6 @@ of_init_fail:
 	wakeup_source_trash(&chip->resume_soc_wakeup_source.source);
 	wakeup_source_trash(&chip->empty_check_wakeup_source.source);
 	wakeup_source_trash(&chip->profile_wakeup_source.source);
-	wakeup_source_trash(&chip->update_sram_wakeup_source.source);
 	wakeup_source_trash(&chip->gain_comp_wakeup_source.source);
 	wakeup_source_trash(&chip->capacity_learning_wakeup_source.source);
 	wakeup_source_trash(&chip->esr_extract_wakeup_source.source);
