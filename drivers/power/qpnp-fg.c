@@ -508,7 +508,6 @@ struct fg_chip {
 	struct power_supply	*batt_psy;
 	struct power_supply	*usb_psy;
 	struct power_supply	*dc_psy;
-	struct fg_wakeup_source	memif_wakeup_source;
 	struct fg_wakeup_source	profile_wakeup_source;
 	struct fg_wakeup_source	empty_check_wakeup_source;
 	struct fg_wakeup_source	resume_soc_wakeup_source;
@@ -989,7 +988,6 @@ static int fg_req_and_wait_access(struct fg_chip *chip, int timeout)
 			pr_err("failed to set mem access bit\n");
 			return -EIO;
 		}
-		fg_stay_awake(&chip->memif_wakeup_source);
 	}
 
 wait:
@@ -1016,7 +1014,6 @@ static int fg_release_access(struct fg_chip *chip)
 
 	rc = fg_masked_write(chip, MEM_INTF_CFG(chip),
 			RIF_MEM_ACCESS_REQ, 0, 1);
-	fg_relax(&chip->memif_wakeup_source);
 	reinit_completion(&chip->sram_access_granted);
 
 	return rc;
@@ -1752,7 +1749,6 @@ static int fg_interleaved_mem_read(struct fg_chip *chip, u8 *val, u16 address,
 		return -EINVAL;
 	}
 
-	fg_stay_awake(&chip->memif_wakeup_source);
 	address = ((orig_address + offset) / 4) * 4;
 	offset = (orig_address + offset) % 4;
 
@@ -1832,7 +1828,6 @@ out:
 	mutex_unlock(&chip->rw_lock);
 
 exit:
-	fg_relax(&chip->memif_wakeup_source);
 	return rc;
 }
 
@@ -1853,7 +1848,6 @@ static int fg_interleaved_mem_write(struct fg_chip *chip, u8 *val, u16 address,
 		return -EINVAL;
 	}
 
-	fg_stay_awake(&chip->memif_wakeup_source);
 	address = ((orig_address + offset) / 4) * 4;
 	offset = (orig_address + offset) % 4;
 
@@ -1888,8 +1882,6 @@ out:
 	if (rc)
 		pr_err("failed to reset IMA access bit rc = %d\n", rc);
 
-	mutex_unlock(&chip->rw_lock);
-	fg_relax(&chip->memif_wakeup_source);
 	return rc;
 }
 
@@ -7558,7 +7550,6 @@ static void fg_cleanup(struct fg_chip *chip)
 	mutex_destroy(&chip->ima_recovery_lock);
 	wakeup_source_trash(&chip->resume_soc_wakeup_source.source);
 	wakeup_source_trash(&chip->empty_check_wakeup_source.source);
-	wakeup_source_trash(&chip->memif_wakeup_source.source);
 	wakeup_source_trash(&chip->profile_wakeup_source.source);
 	wakeup_source_trash(&chip->update_temp_wakeup_source.source);
 	wakeup_source_trash(&chip->update_sram_wakeup_source.source);
@@ -8751,8 +8742,6 @@ static int fg_probe(struct spmi_device *spmi)
 
 	wakeup_source_init(&chip->empty_check_wakeup_source.source,
 			"qpnp_fg_empty_check");
-	wakeup_source_init(&chip->memif_wakeup_source.source,
-			"qpnp_fg_memaccess");
 	wakeup_source_init(&chip->profile_wakeup_source.source,
 			"qpnp_fg_profile");
 	wakeup_source_init(&chip->update_temp_wakeup_source.source,
@@ -8987,7 +8976,6 @@ of_init_fail:
 	mutex_destroy(&chip->ima_recovery_lock);
 	wakeup_source_trash(&chip->resume_soc_wakeup_source.source);
 	wakeup_source_trash(&chip->empty_check_wakeup_source.source);
-	wakeup_source_trash(&chip->memif_wakeup_source.source);
 	wakeup_source_trash(&chip->profile_wakeup_source.source);
 	wakeup_source_trash(&chip->update_temp_wakeup_source.source);
 	wakeup_source_trash(&chip->update_sram_wakeup_source.source);
