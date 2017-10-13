@@ -641,9 +641,11 @@ static int fpc1020_tee_probe(struct platform_device *pdev)
 	if (rc)
 		goto exit;
 
+#ifdef CONFIG_FINGERPRINT_BOOST
 	rc = fpc1020_input_init(fpc1020);
 	if (rc)
 		goto exit;
+#endif
 
 	wake_lock_init(&fpc1020->ttw_wl, WAKE_LOCK_SUSPEND, "fpc_ttw_wl");
 
