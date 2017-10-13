@@ -181,7 +181,7 @@ config ADRENO_IDLER
 	  maintaining high-performance.
 
 config ADRENO_BOOST
-	tristate "MSM Adreno idler"
+	tristate "MSM Adreno boost"
 	depends on DEVFREQ_GOV_MSM_ADRENO_TZ
 	help
 	  Boosts GPU for given amount of time.
