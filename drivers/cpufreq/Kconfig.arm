@@ -254,3 +254,9 @@ config CPU_FREQ_MSM
 	default y
 	help
 	  This enables the CPUFreq driver for Qualcomm CPUs.
+
+config ALUCARD_HOTPLUG
+	bool "Enable alucard-hotplug cpu hotplug driver"
+	help
+	  Generic Alucard-hotplug cpu hotplug driver for ARM SOCs.
+
