@@ -118,6 +118,8 @@ static void wakelocks_gc(void)
 			break;
 
 		if (!active) {
+			pr_info("Removing wakeup source: %s for %s", wl->ws.name, wl->name);
+
 			wakeup_source_remove(&wl->ws);
 			rb_erase(&wl->node, &wakelocks_tree);
 			list_del(&wl->lru);
