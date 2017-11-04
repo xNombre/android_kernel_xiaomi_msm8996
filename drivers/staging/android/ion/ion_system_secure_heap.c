@@ -155,9 +155,6 @@ static void ion_system_secure_heap_prefetch_work(struct work_struct *work)
 		ret = sys_heap->ops->allocate(sys_heap, buffer, size,
 						PAGE_SIZE, 0);
 		if (ret) {
-			pr_debug("%s: Failed to get %zx allocation for %s, ret = %d\n",
-				__func__, info->size, secure_heap->heap.name,
-				ret);
 			spin_lock_irqsave(&secure_heap->work_lock, flags);
 			continue;
 		}
