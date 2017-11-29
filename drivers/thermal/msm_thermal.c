@@ -197,7 +197,7 @@ static LIST_HEAD(devices_list);
 static LIST_HEAD(thresholds_list);
 static int mitigation = 1;
 
-static void freq_mitigation_reinit();
+static void freq_mitigation_reinit(void);
 
 enum thermal_threshold {
 	HOTPLUG_THRESHOLD_HIGH,
@@ -3728,14 +3728,6 @@ static int freq_mitigation_notify(enum thermal_trip_type type,
 	return 0;
 }
 
-static void freq_mitigation_reinit()
-{
-	pr_warn("Trying to reinitialize Frequency mitigation task...\n");
-	pr_warn("Dumping mitg parameters: %d , %d , %d .\n", msm_thermal_info.freq_mitig_temp_degc, msm_thermal_info.freq_mitig_temp_hysteresis_degc, msm_thermal_info.freq_limit);
-
-	freq_mitigation_init();
-}
-
 static void freq_mitigation_init(void)
 {
 	uint32_t cpu = 0;
@@ -3784,6 +3776,14 @@ init_freq_thread:
 	} else {
 		complete(&freq_mitigation_complete);
 	}
+}
+
+static void freq_mitigation_reinit(void)
+{
+	pr_warn("Trying to reinitialize Frequency mitigation task...\n");
+	pr_warn("Dumping mitg parameters: %d , %d , %d .\n", msm_thermal_info.freq_mitig_temp_degc, msm_thermal_info.freq_mitig_temp_hysteresis_degc, msm_thermal_info.freq_limit);
+
+	freq_mitigation_init();
 }
 
 int msm_thermal_get_freq_plan_size(uint32_t cluster, unsigned int *table_len)
