@@ -44,7 +44,6 @@
  */
 
 #include <linux/powersuspend.h>
-#include <linux/state_notifier.h>
 #include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/workqueue.h>
@@ -67,13 +66,12 @@ static int state;
 static int mode;
 static int mode_prev;
 extern bool screen_on;
-extern bool is_state_notifier_enabled(void);
 
 void register_power_suspend(struct power_suspend *handler)
 {
 	struct list_head *pos;
 
-	if (is_state_notifier_enabled() || mode == POWER_SUSPEND_USERSPACE)
+	if (mode == POWER_SUSPEND_USERSPACE)
 		return;
 
 	mutex_lock(&power_suspend_lock);
@@ -88,7 +86,7 @@ EXPORT_SYMBOL(register_power_suspend);
 
 void unregister_power_suspend(struct power_suspend *handler)
 {
-	if (is_state_notifier_enabled() || mode == POWER_SUSPEND_USERSPACE)
+	if (mode == POWER_SUSPEND_USERSPACE)
 		return;
 
 	mutex_lock(&power_suspend_lock);
@@ -103,7 +101,7 @@ static void power_suspend(struct work_struct *work)
 	unsigned long irqflags;
 
 
-	if (is_state_notifier_enabled() || mode == POWER_SUSPEND_USERSPACE)
+	if (mode == POWER_SUSPEND_USERSPACE)
 		return;
 
 	mutex_lock(&power_suspend_lock);
@@ -125,7 +123,7 @@ static void power_resume(struct work_struct *work)
 	struct power_suspend *pos;
 	unsigned long irqflags;
 
-	if (is_state_notifier_enabled() || mode == POWER_SUSPEND_USERSPACE)
+	if (mode == POWER_SUSPEND_USERSPACE)
 		return;
 
 	mutex_lock(&power_suspend_lock);
@@ -148,7 +146,7 @@ void set_power_suspend_state(int new_state)
 {
 	unsigned long irqflags;
 
-	if (is_state_notifier_enabled() || mode == POWER_SUSPEND_USERSPACE)
+	if (mode == POWER_SUSPEND_USERSPACE)
 		return;
 
 	if (state != new_state) {
@@ -170,7 +168,7 @@ void set_power_suspend_state(int new_state)
 
 void set_power_suspend_state_autosleep_hook(int new_state)
 {
-	if (is_state_notifier_enabled() || mode == POWER_SUSPEND_USERSPACE)
+	if (mode == POWER_SUSPEND_USERSPACE)
 		return;
 
 	if (mode == POWER_SUSPEND_AUTOSLEEP || mode == POWER_SUSPEND_HYBRID)
@@ -180,7 +178,7 @@ EXPORT_SYMBOL(set_power_suspend_state_autosleep_hook);
 
 void set_power_suspend_state_panel_hook(int new_state)
 {
-	if (is_state_notifier_enabled() || mode == POWER_SUSPEND_USERSPACE)
+	if (mode == POWER_SUSPEND_USERSPACE)
 		return;
 
 	if (mode == POWER_SUSPEND_PANEL || mode == POWER_SUSPEND_HYBRID)
