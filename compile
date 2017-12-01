@@ -1,11 +1,11 @@
 #!/bin/bash
 
-TOOLCHAIN="../aarch64-linux-android-4.9/bin/aarch64-linux-android-"
+TOOLCHAIN="../tc/bin/aarch64-linux-android-"
 ARCH=arm64
-DEFCONFIG=gemini_defconfig
+DEFCONFIG=soda_gemini_defconfig
 KERNEL_IMAGE="Image.gz-dtb"
-NAME=TheSodaUpstream
-OUT=out
+NAME=TheSodaKernel
+OUT=out_soda
 DATE=`date +%d%m%y*%H:%M`
 J=5
 
