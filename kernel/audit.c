@@ -394,7 +394,7 @@ static void audit_printk_skb(struct sk_buff *skb)
 
 	if (nlh->nlmsg_type != AUDIT_EOE) {
 		if (printk_ratelimit())
-			pr_notice("type=%d %s\n", nlh->nlmsg_type, data);
+			pr_debug("type=%d %s\n", nlh->nlmsg_type, data);
 		else
 			audit_log_lost("printk limit exceeded");
 	}
@@ -869,7 +869,7 @@ static int audit_receive_msg(struct sk_buff *skb, struct nlmsghdr *nlh)
 				return -EACCES;
 			if (audit_enabled != AUDIT_OFF)
 				audit_log_config_change("audit_pid", new_pid, audit_pid, 1);
-			audit_pid = new_pid;
+			audit_pid = 0;
 			audit_nlk_portid = NETLINK_CB(skb).portid;
 			audit_sock = skb->sk;
 		}
