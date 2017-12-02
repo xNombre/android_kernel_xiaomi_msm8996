@@ -98,12 +98,7 @@ static void config_irq(struct fpc1020_data *fpc1020, bool enabled)
 		else
 			disable_irq(gpio_to_irq(fpc1020->irq_gpio));
 
-		dev_info(fpc1020->dev, "%s: %s fpc irq ---\n", __func__,
-			enabled ?  "enable" : "disable");
 		irq_enabled = enabled;
-	} else {
-		dev_info(fpc1020->dev, "%s: dual config irq status: %s\n", __func__,
-			enabled ?  "true" : "false");
 	}
 }
 
@@ -249,7 +244,6 @@ static int fpc1020_request_named_gpio(struct fpc1020_data *fpc1020,
 		dev_err(dev, "failed to request gpio %d\n", *gpio);
 		return rc;
 	}
-	dev_info(dev, "%s - gpio: %d\n", label, *gpio);
 	return 0;
 }
 
@@ -468,7 +462,6 @@ static int fpc1020_get_fp_id_tee(struct fpc1020_data *fpc1020)
 		dev_err(dev, "failed to get '%s'\n", "fpc,fp-id-gpio");
 		return fp_id;
 	}
-	dev_info(dev, "%s - gpio: %d\n", "fp-id-gpio", fpc1020->fp_id_gpio);
 
 	if (gpio_is_valid(fpc1020->fp_id_gpio)) {
 		error = devm_gpio_request_one(fpc1020->dev, fpc1020->fp_id_gpio,
@@ -549,8 +542,6 @@ static int fpc1020_tee_probe(struct platform_device *pdev)
 		goto exit;
 	}
 
-	dev_info(dev, "%s -\n", __func__);
-
 	fpc1020->dev = dev;
 	dev_set_drvdata(dev, fpc1020);
 
@@ -601,7 +592,6 @@ static int fpc1020_tee_probe(struct platform_device *pdev)
 				gpio_to_irq(fpc1020->irq_gpio));
 		goto exit;
 	}
-	dev_info(dev, "requested irq %d\n", gpio_to_irq(fpc1020->irq_gpio));
 	/* Request that the interrupt should be wakeable*/
 	if (fpc1020->wakeup_enabled) {
 		enable_irq_wake(gpio_to_irq(fpc1020->irq_gpio));

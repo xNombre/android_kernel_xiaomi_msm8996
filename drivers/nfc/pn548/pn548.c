@@ -157,7 +157,6 @@ static ssize_t pn548_dev_read(struct file *filp, char __user *buf,
 		wake_lock_timeout(&fieldon_wl, msecs_to_jiffies(3*1000));
 
 	if (ret < 0) {
-		pr_err("%s: PN548 i2c_master_recv returned %d\n", __func__, ret);
 		return ret;
 	}
 	if (ret > count) {
@@ -199,7 +198,7 @@ static ssize_t pn548_dev_write(struct file *filp, const char __user *buf,
 	/* Write data */
 	ret = i2c_master_send(pn548_dev->client, tmp, count);
 	if (ret != count) {
-		pr_err("%s : i2c_master_send returned %d\n", __func__, ret);
+		pr_debug("%s : i2c_master_send returned %d\n", __func__, ret);
 		ret = -EIO;
 	}
 	return ret;
@@ -539,7 +538,6 @@ static int pn548_remove(struct i2c_client *client)
 static int pn548_suspend(struct device *device)
 {
 	struct i2c_client *client = to_i2c_client(device);
-	pr_err("%s ++ \n", __func__);
 
 	if (device_may_wakeup(&client->dev))
 		enable_irq_wake(client->irq);
@@ -548,7 +546,7 @@ static int pn548_suspend(struct device *device)
 static int pn548_resume(struct device *device)
 {
 	struct i2c_client *client = to_i2c_client(device);
-	pr_err("%s -- \n", __func__);
+
 	if (device_may_wakeup(&client->dev))
 		disable_irq_wake(client->irq);
 
