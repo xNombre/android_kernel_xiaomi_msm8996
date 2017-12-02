@@ -741,7 +741,7 @@ static int get_esr_lvl(int esr)
 	int i;
 
 	for (i = 0; i < (MAX_ESR_LVL + 1); i++) {
-		pr_info("%d,%d,%d,%d\n", cfg[i].esr, cfg[i].v_cutoff,
+		pr_debug("%d,%d,%d,%d\n", cfg[i].esr, cfg[i].v_cutoff,
 				cfg[i].v_empty, cfg[i].empty_irq_enable);
 		if (esr <= cfg[i].esr)
 			return i;
