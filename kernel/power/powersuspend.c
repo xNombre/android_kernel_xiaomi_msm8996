@@ -47,6 +47,7 @@
 #include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/workqueue.h>
+#include <linux/display_state.h>
 
 #define MAJOR_VERSION	1
 #define MINOR_VERSION	7
@@ -65,7 +66,6 @@ static DEFINE_SPINLOCK(state_lock);
 static int state;
 static int mode;
 static int mode_prev;
-extern bool screen_on;
 
 void register_power_suspend(struct power_suspend *handler)
 {
@@ -106,7 +106,7 @@ static void power_suspend(struct work_struct *work)
 
 	mutex_lock(&power_suspend_lock);
 	spin_lock_irqsave(&state_lock, irqflags);
-	if (unlikely(!screen_on) && (state != POWER_SUSPEND_ACTIVE))
+	if (unlikely(!is_display_on()) && (state != POWER_SUSPEND_ACTIVE))
 		state = POWER_SUSPEND_ACTIVE;
 	spin_unlock_irqrestore(&state_lock, irqflags);
 	mutex_unlock(&power_suspend_lock);
@@ -128,7 +128,7 @@ static void power_resume(struct work_struct *work)
 
 	mutex_lock(&power_suspend_lock);
 	spin_lock_irqsave(&state_lock, irqflags);
-	if (likely(screen_on) && (state != POWER_SUSPEND_INACTIVE))
+	if (likely(is_display_on()) && (state != POWER_SUSPEND_INACTIVE))
 		state = POWER_SUSPEND_INACTIVE;
 	spin_unlock_irqrestore(&state_lock, irqflags);
 	mutex_unlock(&power_suspend_lock);
@@ -218,11 +218,7 @@ static struct kobj_attribute power_suspend_state_attribute =
 static ssize_t power_suspend_mode_show(struct kobject *kobj,
 		struct kobj_attribute *attr, char *buf)
 {
-	if (is_state_notifier_enabled()) {
-		return sprintf(buf, "power_suspend is disabled.%d\n", mode);
-	} else {
 		return sprintf(buf, "%u\n", mode);
-	}
 }
 
 static ssize_t power_suspend_mode_store(struct kobject *kobj,
@@ -281,8 +277,6 @@ static int __init power_suspend_init(void)
 
 	int sysfs_result;
 
-	screen_on = true;
-
 	power_suspend_kobj = kobject_create_and_add("power_suspend",
 			kernel_kobj);
 	if (!power_suspend_kobj) {
@@ -313,12 +307,6 @@ static int __init power_suspend_init(void)
 //	mode = POWER_SUSPEND_AUTOSLEEP;
 	mode = POWER_SUSPEND_HYBRID;
 	mode_prev = POWER_SUSPEND_HYBRID;
-
-	if (is_state_notifier_enabled()) {
-		mode = POWER_SUSPEND_USERSPACE;
-	} else {
-		mode = mode_prev;
-	}
 
 	return 0;
 }
