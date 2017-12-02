@@ -25,10 +25,6 @@
 
 #define MAX_EVENTS 30
 
-#ifdef CONFIG_LAZYPLUG
-extern void lazyplug_enter_lazy(bool enter);
-#endif
-
 static int get_poll_flags(void *instance)
 {
 	struct msm_vidc_inst *inst = instance;
@@ -1257,10 +1253,6 @@ void *msm_vidc_open(int core_id, int session_type)
 	inst->debugfs_root =
 		msm_vidc_debugfs_init_inst(inst, core->debugfs_root);
 
-#ifdef CONFIG_LAZYPLUG
-	lazyplug_enter_lazy(true);
-#endif
-
 	return inst;
 fail_init:
 	v4l2_fh_del(&inst->event_handler);
@@ -1372,9 +1364,6 @@ int msm_vidc_close(void *instance)
 	if (!inst || !inst->core)
 		return -EINVAL;
 
-#ifdef CONFIG_LAZYPLUG
-	lazyplug_enter_lazy(false);
-#endif
 
 	mutex_lock(&inst->registeredbufs.lock);
 	list_for_each_entry_safe(bi, dummy, &inst->registeredbufs.list, list) {
