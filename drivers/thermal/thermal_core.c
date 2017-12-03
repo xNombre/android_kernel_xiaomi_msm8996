@@ -443,6 +443,11 @@ int sensor_get_temp(uint32_t sensor_id, long *temp)
 
 	ret = sensor->tz->ops->get_temp(sensor->tz, temp);
 
+	if (!temp && !ret) {
+		pr_warn("thermal_core: Reporting default temperature. Read failed.");
+		*temp = DEFAULT_TEMP;
+	}
+
 	return ret;
 }
 EXPORT_SYMBOL(sensor_get_temp);
