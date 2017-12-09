@@ -1415,6 +1415,7 @@ enum Tfa98xx_Error tfa_dsp_msg_status(Tfa98xx_handle_t handle, int *pRpcStatus)
 	return error;
 }
 
+#if 0
 const char *tfa98xx_get_i2c_status_id_string(int status)
 {
 		const char *p_id_str;
@@ -1456,6 +1457,12 @@ const char *tfa98xx_get_i2c_status_id_string(int status)
 
 		return p_id_str;
 }
+#else
+const inline char *tfa98xx_get_i2c_status_id_string(int status)
+{
+	return NULL;
+}
+#endif
 
 enum Tfa98xx_Error tfa_dsp_msg_read(Tfa98xx_handle_t handle, int length, unsigned char *bytes)
 {
