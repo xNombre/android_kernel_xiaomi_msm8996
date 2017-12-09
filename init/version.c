@@ -46,5 +46,5 @@ const char linux_banner[] =
 
 const char linux_proc_banner[] =
 	"%s version %s"
-	" (" "Soda-Kernel-" "v1.3" ")"
+	" (" "Soda-Kernel-" "b1.3" ")"
 	" (" LINUX_COMPILER ") %s\n";
