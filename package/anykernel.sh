@@ -2,21 +2,24 @@
 # osm0sis @ xda-developers
 
 ## AnyKernel setup
-# EDIFY properties
-kernel.string=The Soda-Upstream Kernel beta v1.0 by xNombre
+# begin properties
+properties() {
+kernel.string=The Soda Kernel Upstream v1.x.x by xNombre
 do.devicecheck=1
-do.initd=1
-do.modules=1
+do.modules=0
 do.cleanup=1
-device.name1=Gemini
-device.name2=gemini
-device.name3=MI5
+do.cleanuponabort=0
+device.name1=gemini
+device.name2=Gemini
+device.name3=mi5
 device.name4=Mi5
-device.name5=mi5
+device.name5=MI5
+} # end properties
 
 # shell variables
 block=/dev/block/bootdevice/by-name/boot;
 is_slot_device=0;
+ramdisk_compression=auto;
 
 
 ## AnyKernel methods (DO NOT CHANGE)
@@ -24,16 +27,14 @@ is_slot_device=0;
 . /tmp/anykernel/tools/ak2-core.sh;
 
 
-## AnyKernel permissions
-# set permissions for included ramdisk files
-chmod -R 755 $ramdisk
+## AnyKernel file attributes
+# set permissions/ownership for included ramdisk files
+chmod -R 750 $ramdisk/*;
+chown -R root:root $ramdisk/*;
+
 
 ## AnyKernel install
 dump_boot;
-
-# begin ramdisk changes
-
-# end ramdisk changes
 
 write_boot;
 
