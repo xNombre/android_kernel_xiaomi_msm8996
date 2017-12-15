@@ -7,7 +7,7 @@ KERNEL_IMAGE="Image.gz-dtb"
 NAME=TheSodaUpstream
 OUT=out
 DATE=`date +%d%m%y*%H:%M`
-J=5
+J=$(nproc)
 
 if [[ $1 == 'cfg' ]]; then
 	make O=$OUT ARCH=$ARCH -j$J CROSS_COMPILE=$TOOLCHAIN menuconfig KCONFIG_CONFIG=../arch/arm64/configs/$DEFCONFIG
