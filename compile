@@ -1,0 +1,37 @@
+#!/bin/bash
+
+TOOLCHAIN="../aarch64-linux-android-4.9/bin/aarch64-linux-android-"
+ARCH=arm64
+DEFCONFIG=gemini_defconfig
+KERNEL_IMAGE="Image.gz-dtb"
+NAME=TheSodaUpstream
+OUT=out
+DATE=`date +%d%m%y*%H:%M`
+J=$(nproc)
+
+if [[ $1 == 'cfg' ]]; then
+	make O=$OUT ARCH=$ARCH -j$J CROSS_COMPILE=$TOOLCHAIN menuconfig KCONFIG_CONFIG=../arch/arm64/configs/$DEFCONFIG
+	if ! [[ $2 == 'c' ]]; then
+		exit
+	fi
+fi
+
+#Clean
+rm package/zImage 2> /dev/null
+rm $OUT/arch/$ARCH/boot/$KERNEL_IMAGE 2> /dev/null
+rm package/$NAME.zip 2> /dev/null
+
+#Make defconfig
+make O=$OUT ARCH=$ARCH -j$J CROSS_COMPILE=$TOOLCHAIN $DEFCONFIG
+
+#Compile
+make O=$OUT ARCH=$ARCH -j$J CROSS_COMPILE="ccache $TOOLCHAIN"
+
+#Pack zip
+if [ -e $OUT/arch/$ARCH/boot/$KERNEL_IMAGE ]; then
+cp $OUT/arch/$ARCH/boot/$KERNEL_IMAGE package/zImage
+cd package
+zip -r9 ../compiled/$NAME-$DATE.zip * 
+else
+echo 'No boot image!'
+fi
