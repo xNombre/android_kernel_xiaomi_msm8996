@@ -1399,11 +1399,53 @@ source "usr/Kconfig"
 
 endif
 
-config CC_OPTIMIZE_FOR_SIZE
-	bool "Optimize for size"
+choice
+  prompt "Optimization level"
+  default CC_OPTIMIZE_DEF
+
+  config CC_OPTIMIZE_FOR_SIZE
+  	bool "Optimize for size"
 	help
 	  Enabling this option will pass "-Os" instead of "-O2" to gcc
 	  resulting in a smaller kernel.
+
+	  If unsure, say N.
+
+  config CC_OPTIMIZE_DEF
+	bool "Optimize with O2"
+
+  config CC_OPTIMIZE_MAX
+	bool "Optimize with O3"
+	help
+	  Compile the kernel with O3.
+	  Work done by @xNombre.
+
+	  If unsure, say N.
+
+config CC_OPTIMIZE_PARTIAL
+	bool "Optimize with O2 and partially with O3"
+	help
+	  Compiling kernel with O3 doesn't give best results, instead of this it's better to compile only essential parts as O3, eg. I/O subsystem.
+	  Unmarked sections are compiled with O2.
+	  Work done by @xNombre.
+
+	  If unsure, say N.
+
+endchoice
+
+config SODA_SPARKLING_GRAPHITE
+	bool "Pass GRAPHITE flags to compiler"
+	help
+	  This option adds graphite loop-optimizing flags.
+	  Work done by @xNombre.
+
+	  If unsure, say N.
+
+config SODA_SPARKLING_FLAGS
+	bool "Soda Kernel enchanted flags"
+	help
+	  Flags choosed to gain maximum performance on msm8996.
+	  Work done by @xNombre.
 
 	  If unsure, say N.
 
