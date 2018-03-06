@@ -1,3 +1,7 @@
+ifdef CONFIG_CC_OPTIMIZE_PARTIAL
+EXTRA_CFLAGS += -O3
+endif
+
 ccflags-y += -I$(src)
 
 obj-$(CONFIG_FB_MSM_MDSS_MHL3) += mhl3/

@@ -2,6 +2,10 @@
 # Makefile for the video capture/playback device drivers.
 #
 
+ifdef CONFIG_CC_OPTIMIZE_PARTIAL
+EXTRA_CFLAGS += -O3
+endif
+
 obj-$(CONFIG_VIDEO_VINO) += indycam.o
 obj-$(CONFIG_VIDEO_VINO) += vino.o
 

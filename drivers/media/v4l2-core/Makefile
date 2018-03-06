@@ -2,6 +2,10 @@
 # Makefile for the V4L2 core
 #
 
+ifdef CONFIG_CC_OPTIMIZE_PARTIAL
+EXTRA_CFLAGS += -O3
+endif
+
 tuner-objs	:=	tuner-core.o
 
 videodev-objs	:=	v4l2-dev.o v4l2-ioctl.o v4l2-device.o v4l2-fh.o \

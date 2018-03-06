@@ -2,6 +2,10 @@
 # Makefile for the linux kernel.
 #
 
+ifdef CONFIG_CC_OPTIMIZE_PARTIAL
+EXTRA_CFLAGS += -O3
+endif
+
 obj-y     = fork.o exec_domain.o panic.o \
 	    cpu.o exit.o softirq.o resource.o \
 	    sysctl.o sysctl_binary.o capability.o ptrace.o user.o \

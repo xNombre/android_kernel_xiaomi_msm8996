@@ -4,6 +4,10 @@
 
 # Each configuration option enables a list of files.
 
+ifdef CONFIG_CC_OPTIMIZE_PARTIAL
+EXTRA_CFLAGS += -O3
+endif
+
 obj-y				+= core/
 
 obj-$(CONFIG_EXYNOS_VIDEO)     += exynos/
