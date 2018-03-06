@@ -300,12 +300,6 @@ HOSTCXX      = g++
 HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu89 -pipe
 HOSTCXXFLAGS = -O2 -pipe
 
-ifdef CONFIG_SODA_SPARKLING_GRAPHITE
-GRAPHITE = -fgraphite -fgraphite-identity -floop-parallelize-all -ftree-loop-linear -floop-interchange -floop-strip-mine
-else
-GRAPHITE =
-endif
-
 ifeq ($(shell $(HOSTCC) -v 2>&1 | grep -c "clang version"), 1)
 HOSTCFLAGS  += -Wno-unused-value -Wno-unused-parameter \
 		-Wno-missing-field-initializers -fno-delete-null-pointer-checks
@@ -386,16 +380,6 @@ AFLAGS_KERNEL	=
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage -fno-tree-loop-im
 CFLAGS_KCOV	= -fsanitize-coverage=trace-pc
 
-ifdef CONFIG_SODA_SPARKLING_FLAGS
-CFLAGS_MODULE   +=
-AFLAGS_MODULE   +=
-LDFLAGS_MODULE  +=
-CFLAGS_KERNEL	+=
-AFLAGS_KERNEL	+=
-CFLAGS_GCOV	+=
-endif
-
-
 # Use USERINCLUDE when you must reference the UAPI directories only.
 USERINCLUDE    := \
 		-I$(srctree)/arch/$(hdr-arch)/include/uapi \
@@ -420,10 +404,6 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
 		   -std=gnu89
-
-ifdef CONFIG_SODA_SPARKLING_FLAGS
-KBUILD_CFLAGS += -march=armv8-a+simd+crypto+crc -mtune=cortex-a57.cortex-a53 -mcpu=cortex-a57.cortex-a53 -munaligned-access -marm
-endif
 
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
@@ -638,6 +618,25 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, format-overflow)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, int-in-bool-context)
 KBUILD_CFLAGS	+= $(call cc-option,-fno-PIE)
 KBUILD_AFLAGS	+= $(call cc-option,-fno-PIE)
+
+# not all drivers like store merging in newer GCCs
+# -pipe makes compilation faster
+# msm8996 is not affected so disable errata fixes
+KBUILD_CFLAGS   += -fno-store-merging -pipe -mno-fix-cortex-a53-843419 -mno-fix-cortex-a53-835769 
+
+ifdef CONFIG_SODA_SPARKLING_GRAPHITE
+KBUILD_CFLAGS += -fgraphite -fgraphite-identity -floop-parallelize-all
+# -ftree-loop-distribute-patterns -ftree-loop-distribution -ftree-vectorize
+endif
+
+ifdef CONFIG_SODA_SPARKLING_FLAGS
+KBUILD_CFLAGS += -march=armv8-a+simd+crypto+crc -mtune=cortex-a57.cortex-a53 -fmerge-all-constants
+# -finline-functions -> no significant performance jump, significantly increased size
+# -fpredictive-commoning -> slowing down intercore scores
+# -fmodulo-sched -fmodulo-sched-allow-regmoves -> gcc segfault lol
+# -floop-interchange -> probably incompatible?
+# -ffast-math -ftree-vectorize -ftree-slp-vectorize
+endif
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os
