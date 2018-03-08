@@ -15,15 +15,15 @@
 #define __CHGCTL_KERNEL_H
 
 // Known knob to force 900mA charging
-extern bool force_fast_charge;
+extern bool __read_mostly force_fast_charge;
 
 // Variable to manipulate maximum charge percent
 // Charging battery to 80% can insrease its lifetime sginificantly
-extern int charge_limit;
+extern int __read_mostly charge_limit;
 
 // Variable to change maximum current from QC3.0 charger
 // This could prevent issues with heating and broken hardware
 // By default lowered than on stock
-extern int maximum_qc_current;
+extern int __read_mostly maximum_qc_current;
 
 #endif
