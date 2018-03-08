@@ -40,6 +40,10 @@
 #include <linux/ktime.h>
 #include <linux/pmic-voter.h>
 
+#ifdef CONFIG_CHARGE_CONTROL
+#include "charge_control.h"
+#endif
+
 /* Mask/Bit helpers */
 #define _SMB_MASK(BITS, POS) \
 	((unsigned char)(((1 << (BITS)) - 1) << (POS)))
@@ -445,7 +449,11 @@ module_param_named(
 	int, S_IRUSR | S_IWUSR
 );
 
+#ifdef CONFIG_CHARGE_CONTROL
+#define smbchg_default_hvdcp3_icl_ma maximum_qc_current
+#else
 static int smbchg_default_hvdcp3_icl_ma = 3000;
+#endif
 module_param_named(
 	default_hvdcp3_icl_ma, smbchg_default_hvdcp3_icl_ma,
 	int, S_IRUSR | S_IWUSR
@@ -1073,6 +1081,12 @@ static int get_prop_batt_capacity(struct smbchg_chip *chip)
 		pr_smb(PR_STATUS, "Couldn't get capacity rc = %d\n", rc);
 		capacity = DEFAULT_BATT_CAPACITY;
 	}
+
+#ifdef CONFIG_CHARGE_CONTROL
+	if(unlikely(get_prop_batt_status(chip) == POWER_SUPPLY_STATUS_CHARGING && capacity >= charge_limit)) {
+		vote(chip->battchg_suspend_votable, BATTCHG_USER_EN_VOTER, 1, 0);
+	}
+#endif
 	return capacity;
 }
 
@@ -1701,7 +1715,11 @@ static int smbchg_set_usb_current_max(struct smbchg_chip *chip,
 
 		/* handle special SDP case when USB reports high current */
 		if (current_ma > CURRENT_900_MA) {
-			if (chip->cfg_override_usb_current) {
+			if (chip->cfg_override_usb_current
+#ifdef CONFIG_CHARGE_CONTROL
+						|| force_fast_charge
+#endif
+								) {
 				/*
 				 * allow setting the current value as reported
 				 * by USB driver.
@@ -1720,15 +1738,36 @@ static int smbchg_set_usb_current_max(struct smbchg_chip *chip,
 					pr_err("Couldn't set ICL override rc = %d\n",
 							rc);
 			} else {
-				/* default to 500mA */
-				current_ma = CURRENT_500_MA;
+				/* default to 900mA */
+				current_ma = CURRENT_900_MA;
 			}
 			pr_smb(PR_STATUS,
 				"override_usb_current=%d current_ma set to %d\n",
 				chip->cfg_override_usb_current, current_ma);
 		}
-
-		if (current_ma < CURRENT_150_MA) {
+		else if (current_ma == CURRENT_900_MA
+#ifdef CONFIG_CHARGE_CONTROL
+						|| force_fast_charge
+#endif
+								) {
+			rc = smbchg_sec_masked_write(chip,
+					chip->usb_chgpth_base + CHGPTH_CFG,
+					CFG_USB_2_3_SEL_BIT, CFG_USB_3);
+			if (rc < 0) {
+				pr_err("Couldn't set CHGPTH_CFG rc = %d\n", rc);
+				goto out;
+			}
+			rc = smbchg_masked_write(chip,
+					chip->usb_chgpth_base + CMD_IL,
+					USBIN_MODE_CHG_BIT | USB51_MODE_BIT,
+					USBIN_LIMITED_MODE | USB51_500MA);
+			if (rc < 0) {
+				pr_err("Couldn't set CMD_IL rc = %d\n", rc);
+				goto out;
+			}
+			chip->usb_max_current_ma = 900;
+		}
+		else if (current_ma < CURRENT_150_MA) {
 			/* force 100mA */
 			rc = smbchg_sec_masked_write(chip,
 					chip->usb_chgpth_base + CHGPTH_CFG,
@@ -1748,7 +1787,7 @@ static int smbchg_set_usb_current_max(struct smbchg_chip *chip,
 			chip->usb_max_current_ma = 100;
 		}
 		/* specific current values */
-		if (current_ma == CURRENT_150_MA) {
+		else if (current_ma == CURRENT_150_MA) {
 			rc = smbchg_sec_masked_write(chip,
 					chip->usb_chgpth_base + CHGPTH_CFG,
 					CFG_USB_2_3_SEL_BIT, CFG_USB_3);
@@ -1766,7 +1805,7 @@ static int smbchg_set_usb_current_max(struct smbchg_chip *chip,
 			}
 			chip->usb_max_current_ma = 150;
 		}
-		if (current_ma == CURRENT_500_MA) {
+		else if (current_ma == CURRENT_500_MA) {
 			rc = smbchg_sec_masked_write(chip,
 					chip->usb_chgpth_base + CHGPTH_CFG,
 					CFG_USB_2_3_SEL_BIT, CFG_USB_2);
@@ -1783,24 +1822,6 @@ static int smbchg_set_usb_current_max(struct smbchg_chip *chip,
 				goto out;
 			}
 			chip->usb_max_current_ma = 500;
-		}
-		if (current_ma == CURRENT_900_MA) {
-			rc = smbchg_sec_masked_write(chip,
-					chip->usb_chgpth_base + CHGPTH_CFG,
-					CFG_USB_2_3_SEL_BIT, CFG_USB_3);
-			if (rc < 0) {
-				pr_err("Couldn't set CHGPTH_CFG rc = %d\n", rc);
-				goto out;
-			}
-			rc = smbchg_masked_write(chip,
-					chip->usb_chgpth_base + CMD_IL,
-					USBIN_MODE_CHG_BIT | USB51_MODE_BIT,
-					USBIN_LIMITED_MODE | USB51_500MA);
-			if (rc < 0) {
-				pr_err("Couldn't set CMD_IL rc = %d\n", rc);
-				goto out;
-			}
-			chip->usb_max_current_ma = 900;
 		}
 		break;
 	case POWER_SUPPLY_TYPE_USB_CDP:
@@ -4961,6 +4982,12 @@ static void handle_usb_removal(struct smbchg_chip *chip)
 		HVDCP_SHORT_DEGLITCH_VOTER, false, 0);
 	if (!chip->hvdcp_not_supported)
 		restore_from_hvdcp_detection(chip);
+
+#ifdef CONFIG_CHARGE_CONTROL
+	// Enable charging again
+	if(get_effective_result(chip->battchg_suspend_votable) == 1)
+		vote(chip->battchg_suspend_votable, BATTCHG_USER_EN_VOTER, 0, 0);
+#endif
 }
 
 static bool is_usbin_uv_high(struct smbchg_chip *chip)
