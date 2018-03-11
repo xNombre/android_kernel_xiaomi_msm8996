@@ -545,11 +545,11 @@ static void cpufreq_interactive_timer(unsigned long data)
 		pcpu->loadadjfreq = max(t_prevlaf, t_predlaf);
 
 		/* detect heavy new task and jump to policy->max */
-		if (prev_l >= tunables->go_hispeed_load &&
+		/*if (prev_l >= tunables->go_hispeed_load &&
 		    new_load_pct >= NEW_TASK_RATIO) {
 			skip_hispeed_logic = true;
 			jump_to_max = true;
-		}
+		}*/
 		i++;
 	}
 	spin_unlock(&ppol->load_lock);
@@ -560,9 +560,9 @@ static void cpufreq_interactive_timer(unsigned long data)
 	pred_chfreq = choose_freq(ppol, pred_laf);
 	chosen_freq = max(prev_chfreq, pred_chfreq);
 
-	if (prev_chfreq < ppol->policy->max && pred_chfreq >= ppol->policy->max)
+	/*if (prev_chfreq < ppol->policy->max && pred_chfreq >= ppol->policy->max)
 		if (!jump_to_max)
-			jump_to_max_no_ts = true;
+			jump_to_max_no_ts = true;*/
 
 	if (now - ppol->max_freq_hyst_start_time <
 	    tunables->max_freq_hysteresis &&
@@ -570,14 +570,14 @@ static void cpufreq_interactive_timer(unsigned long data)
 	    ppol->target_freq < ppol->policy->max) {
 		skip_hispeed_logic = true;
 		skip_min_sample_time = true;
-		if (!jump_to_max)
-			jump_to_max_no_ts = true;
+		/*if (!jump_to_max)
+			jump_to_max_no_ts = true;*/
 	}
 
 	new_freq = chosen_freq;
-	if (jump_to_max_no_ts || jump_to_max) {
+	/*if (jump_to_max_no_ts || jump_to_max) {
 		new_freq = ppol->policy->cpuinfo.max_freq;
-	} else if (!skip_hispeed_logic) {
+	} else*/ if (!skip_hispeed_logic) {
 		if (pol_load >= tunables->go_hispeed_load ||
 		    tunables->boosted) {
 			if (ppol->target_freq < tunables->hispeed_freq)
