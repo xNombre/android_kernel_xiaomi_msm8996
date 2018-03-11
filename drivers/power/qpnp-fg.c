@@ -2703,7 +2703,7 @@ static void soc_work_fn(struct work_struct *work)
 	static int prev_soc = -EINVAL;
 
 	soc = get_prop_capacity(chip);
-	pr_info("adjust_soc: s %d r %d i %d v %d t %d\n",
+	pr_debug("adjust_soc: s %d r %d i %d v %d t %d\n",
 			soc,
 			get_sram_prop_now(chip, FG_DATA_BATT_ESR),
 			get_sram_prop_now(chip, FG_DATA_CURRENT),
