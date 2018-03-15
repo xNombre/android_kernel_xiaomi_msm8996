@@ -27,6 +27,10 @@
 #include <linux/msm-bus.h>
 #include <linux/pm_qos.h>
 
+#ifdef CONFIG_STATE_NOTIFIER
+#include <linux/state_notifier.h>
+#endif
+
 #include "mdss.h"
 #include "mdss_panel.h"
 #include "mdss_dsi.h"
@@ -440,6 +444,9 @@ int mdss_dsi_panel_power_ctrl(struct mdss_panel_data *pdata,
 	switch (power_state) {
 	case MDSS_PANEL_POWER_OFF:
 		ret = mdss_dsi_panel_power_off(pdata);
+#ifdef CONFIG_STATE_NOTIFIER
+		state_suspend();
+#endif
 		break;
 	case MDSS_PANEL_POWER_ON:
 		if (mdss_dsi_is_panel_on_ulp(pdata)) {
@@ -451,6 +458,9 @@ int mdss_dsi_panel_power_ctrl(struct mdss_panel_data *pdata,
 		} else {
 			ret = mdss_dsi_panel_power_on(pdata);
 		}
+#ifdef CONFIG_STATE_NOTIFIER
+		state_resume();
+#endif
 		break;
 	case MDSS_PANEL_POWER_LP1:
 		if (mdss_dsi_is_panel_on_ulp(pdata))
