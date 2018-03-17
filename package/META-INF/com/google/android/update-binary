@@ -56,11 +56,6 @@ bb=/tmp/anykernel/tools/busybox;
 chmod 755 $bb;
 $bb chmod -R 755 /tmp/anykernel/tools /tmp/anykernel/bin;
 
-ui_print "============================================";
-ui_print "       THE SODA KERNEL - XIAOMI MI5         ";
-ui_print "============================================";
-ui_print "Flashing:";
-
 if [ -f /tmp/anykernel/banner ]; then
   while IFS='' read -r line || $bb [[ -n "$line" ]]; do
     ui_print "$line";
@@ -76,7 +71,7 @@ if [ -f /tmp/anykernel/version ]; then
   ui_print " ";
 fi;
 ui_print " ";
-ui_print "Using: AnyKernel2 by osm0sis @ xda-developers";
+ui_print "AnyKernel2 by osm0sis @ xda-developers";
 ui_print " ";
 ui_print " ";
 

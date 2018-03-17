@@ -4,7 +4,7 @@
 ## AnyKernel setup
 # begin properties
 properties() {
-kernel.string=The Soda Kernel Upstream v1.x.x by xNombre
+kernel.string=Flashing: The Soda Kernel version 
 do.devicecheck=1
 do.modules=0
 do.cleanup=1
@@ -35,6 +35,10 @@ chown -R root:root $ramdisk/*;
 
 ## AnyKernel install
 dump_boot;
+
+# begin ramdisk changes
+
+# end ramdisk changes
 
 write_boot;
 
