@@ -122,6 +122,9 @@ config DYNAMIC_DEBUG
 
 	  See Documentation/dynamic-debug-howto.txt for additional information.
 
+config REJECT_USERSPACE_KMESG
+	bool "Disallow userspace from writing to kmesg"
+
 endmenu # "printk and dmesg options"
 
 menu "Compile-time checks and compiler options"
