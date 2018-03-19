@@ -78,7 +78,7 @@ ui_print " ";
 umount /system 2>/dev/null;
 umount /vendor 2>/dev/null;
 mount -o ro -t auto /system;
-mount -o ro -t auto /vendor 2>/dev/null;
+mount -o rw -t auto /vendor 2>/dev/null;
 mount /data 2>/dev/null;
 test -f /system/system/build.prop && root=/system;
 
