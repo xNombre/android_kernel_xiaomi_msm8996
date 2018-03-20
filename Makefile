@@ -403,7 +403,7 @@ LINUXINCLUDE    := \
 
 KBUILD_CPPFLAGS := -D__KERNEL__
 
-KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+KBUILD_CFLAGS   := -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
@@ -626,7 +626,7 @@ KBUILD_AFLAGS	+= $(call cc-option,-fno-PIE)
 # not all drivers like store merging in newer GCCs
 # -pipe makes compilation faster
 # msm8996 is not affected so disable errata fixes
-KBUILD_CFLAGS   += -fno-store-merging -pipe -mno-fix-cortex-a53-843419 -mno-fix-cortex-a53-835769 
+KBUILD_CFLAGS   += -fno-store-merging -pipe -mno-fix-cortex-a53-843419 -mno-fix-cortex-a53-835769 -Wno-attribute-alias
 
 ifdef CONFIG_SODA_SPARKLING_GRAPHITE
 KBUILD_CFLAGS += -fgraphite -fgraphite-identity -floop-parallelize-all
