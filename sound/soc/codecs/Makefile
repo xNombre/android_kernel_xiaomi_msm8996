@@ -382,3 +382,5 @@ obj-$(CONFIG_SND_SOC_MAX9877)	+= snd-soc-max9877.o
 obj-$(CONFIG_SND_SOC_TPA6130A2)	+= snd-soc-tpa6130a2.o
 obj-$(CONFIG_SND_SOC_OPA1622)	+= snd-soc-opa1622.o
 obj-$(CONFIG_SND_SOC_LM48560)	+= snd-soc-lm48560.o
+obj-$(CONFIG_SND_SOC_TFA98XX) += tfa98xx/
+
