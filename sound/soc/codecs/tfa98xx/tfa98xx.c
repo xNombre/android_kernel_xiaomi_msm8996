@@ -32,8 +32,6 @@
 #include <linux/input.h>
 #include "config.h"
 #include <linux/time.h>
-#include <linux/mfd/spk-id.h>
-
 
 #define I2C_RETRIES 50
 #define I2C_RETRY_DELAY 5 /* ms */
@@ -216,7 +214,7 @@ static enum tfa_error tfa98xx_tfa_start(struct tfa98xx *tfa98xx, int next_profil
 {
 	enum tfa_error err;
 
-	pr_info("tfa98xx_tfa_start()   begin   next_profile=%d\n", next_profile);
+	pr_debug("tfa98xx_tfa_start()   begin   next_profile=%d\n", next_profile);
 	tfa98xx_dump_register(tfa98xx, 1, "tfa98xx_tfa_start begin");
 	err = tfa_start(next_profile, vstep);
 
@@ -1716,7 +1714,7 @@ static const struct snd_soc_dapm_route tfa9888_input_dapm_routes[] = {
 
 static void tfa98xx_add_widgets(struct tfa98xx *tfa98xx)
 {
-#if LINUX_VERSION_CODE <= KERNEL_VERSION(3, 18, 200)
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(3, 18, 400)
 	struct snd_soc_dapm_context *dapm = &tfa98xx->codec->dapm;
 #else
 	struct snd_soc_dapm_context *dapm = snd_soc_codec_get_dapm(tfa98xx->codec);
@@ -2596,7 +2594,7 @@ static void tfa98xx_interrupt(struct work_struct *work)
 
 	u32 out1, out2, out3;
 
-	pr_info("\n");
+	pr_debug("\n");
 
 	regmap_read(tfa98xx->regmap, base_addr_ist + 0, &out1);
 	regmap_read(tfa98xx->regmap, base_addr_ist + 1, &out2);
@@ -2981,7 +2979,7 @@ static void tfa98xx_irq_tfa2(struct tfa98xx *tfa98xx)
 	u32 en1, en2, en3;
 	u32 out1 = 0, out2 = 0, out3 = 0;
 
-	pr_info("tfa98xx_irq_tfa2 begin\n");
+	pr_debug("tfa98xx_irq_tfa2 begin\n");
 
 	regmap_read(tfa98xx->regmap, base_addr_inten + 0, &en1);
 	regmap_read(tfa98xx->regmap, base_addr_inten + 1, &en2);
@@ -2991,9 +2989,9 @@ static void tfa98xx_irq_tfa2(struct tfa98xx *tfa98xx)
 	regmap_read(tfa98xx->regmap, base_addr_ist + 1, &out2);
 	regmap_read(tfa98xx->regmap, base_addr_ist + 2, &out3);
 
-	pr_info("interrupt1: 0x%.4x (enabled: 0x%.4x)\n", out1, en1);
-	pr_info("interrupt2: 0x%.4x (enabled: 0x%.4x)\n", out2, en2);
-	pr_info("interrupt3: 0x%.4x (enabled: 0x%.4x)\n", out3, en3);
+	pr_debug("interrupt1: 0x%.4x (enabled: 0x%.4x)\n", out1, en1);
+	pr_debug("interrupt2: 0x%.4x (enabled: 0x%.4x)\n", out2, en2);
+	pr_debug("interrupt3: 0x%.4x (enabled: 0x%.4x)\n", out3, en3);
 
 	out1 &= en1;
 	out2 &= en2;
@@ -3008,7 +3006,7 @@ static void tfa98xx_irq_tfa2(struct tfa98xx *tfa98xx)
 	regmap_write(tfa98xx->regmap, base_addr_inten + 2, en3);
 
 	if (out1 || out2 || out3) {
-		pr_info("Schduled interrupt_work\n");
+		pr_debug("Schduled interrupt_work\n");
 		queue_delayed_work(tfa98xx->tfa98xx_wq, &tfa98xx->interrupt_work, 0);
 	}
 }
@@ -3077,38 +3075,7 @@ static int tfa98xx_parse_dt(struct device *dev, struct tfa98xx *tfa98xx,
 	if (tfa98xx->irq_gpio < 0)
 		dev_dbg(dev, "No IRQ GPIO provided.\n");
 
-	tfa98xx->spk_id_gpio_p = of_parse_phandle(dev->of_node,
-					"spk-id", 0);
-	if (!tfa98xx->spk_id_gpio_p)
-		dev_dbg(dev, "property %s not detected in node %s\n",
-			"spk-id", dev->of_node->full_name);
-
 	return 0;
-}
-
-static int tfa98xx_get_spk_id(struct tfa98xx *tfa98xx)
-{
-	int state = -1;
-	int id;
-
-	if (tfa98xx->spk_id_gpio_p)
-		state = spk_id_get_pin_3state(tfa98xx->spk_id_gpio_p);
-
-	switch (state) {
-	case PIN_PULL_DOWN:
-		id = VENDOR_ID_AAC;
-		break;
-	case PIN_PULL_UP:
-		id = VENDOR_ID_UNKNOWN;
-		break;
-	case PIN_FLOAT:
-		id = VENDOR_ID_SSI;
-	default:
-		id = VENDOR_ID_UNKNOWN;
-		break;
-	}
-
-	return id;
 }
 
 static ssize_t tfa98xx_reg_write(struct file *filp, struct kobject *kobj,
@@ -3229,7 +3196,7 @@ static int tfa98xx_i2c_probe(struct i2c_client *i2c,
 	unsigned int reg;
 	int ret;
 
-	pr_info("%s\n", __func__);
+	pr_debug("%s\n", __func__);
 	tfa98xx_kmsg_regs = 0;
 	tfa98xx_ftrace_regs = 0;
 	tfa98xx_registered_handles = 0;
@@ -3292,12 +3259,6 @@ static int tfa98xx_i2c_probe(struct i2c_client *i2c,
 		if (ret)
 			goto err;
 	}
-
-	/*if (tfa98xx_get_spk_id(tfa98xx) == VENDOR_ID_SSI)
-		fw_name = "tfa98xx_ssi.cnt";
-	else
-		fw_name = "tfa98xx_aac.cnt";
-	dev_info(&i2c->dev, "%s: fw name is %s\n", __func__, fw_name);*/
 
 	/* Power up! */
 	tfa98xx_ext_reset(tfa98xx);
@@ -3406,7 +3367,7 @@ static int tfa98xx_i2c_probe(struct i2c_client *i2c,
 	if (ret)
 		dev_info(&i2c->dev, "error creating sysfs files\n");
 
-	pr_info("%s Probe completed successfully!\n", __func__);
+	pr_debug("%s Probe completed successfully!\n", __func__);
 
 	return 0;
 
