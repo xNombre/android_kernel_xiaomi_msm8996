@@ -12351,7 +12351,7 @@ static int tasha_dig_core_power_collapse(struct tasha_priv *tasha,
 
 	if (req_state == POWER_COLLAPSE) {
 		if (tasha->power_active_ref == 0) {
-			schedule_delayed_work(&tasha->power_gate_work,
+			queue_delayed_work(system_power_efficient_wq, &tasha->power_gate_work,
 			msecs_to_jiffies(dig_core_collapse_timer * 1000));
 		}
 	} else if (req_state == POWER_RESUME) {
@@ -13456,7 +13456,7 @@ static void tasha_cdc_change_cpe_clk(void *data,
 {
 	struct snd_soc_codec *codec = data;
 	struct tasha_priv *tasha;
-	u32 cpe_clk_khz, req_freq;
+	u32 cpe_clk_khz, req_freq = 0;
 
 	if (!codec) {
 		pr_err("%s: Invalid codec handle\n",
@@ -13757,6 +13757,37 @@ static struct regulator *tasha_codec_find_ondemand_regulator(
 
 #ifdef CONFIG_SOUND_CONTROL
 static struct snd_soc_codec *sound_control_codec_ptr;
+bool enable_compander = 1;
+
+static ssize_t enable_compander_show(struct kobject *kobj,
+		struct kobj_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n", enable_compander);
+}
+
+static ssize_t enable_compander_store(struct kobject *kobj,
+		struct kobj_attribute *attr, const char *buf, size_t count)
+{
+	struct tasha_priv *tasha;
+
+	if(strtobool(buf, &enable_compander))
+		return -EINVAL;
+
+	// Update companders
+	tasha = snd_soc_codec_get_drvdata(sound_control_codec_ptr);
+	tasha->comp_enabled[COMPANDER_1] = enable_compander;
+	tasha->comp_enabled[COMPANDER_2] = enable_compander;
+
+	snd_soc_update_bits(sound_control_codec_ptr, WCD9335_HPH_L_EN, 0x20, (enable_compander ? 0x00:0x20));
+	snd_soc_update_bits(sound_control_codec_ptr, WCD9335_HPH_R_EN, 0x20, (enable_compander ? 0x00:0x20));
+
+	return count;
+}
+
+static struct kobj_attribute enable_compander_attribute =
+	__ATTR(enable_compander, 0664,
+		enable_compander_show,
+		enable_compander_store);
 
 static ssize_t headphone_gain_show(struct kobject *kobj,
 		struct kobj_attribute *attr, char *buf)
@@ -13823,7 +13854,7 @@ static struct kobj_attribute mic_gain_attribute =
 		mic_gain_store);
 
 struct snd_soc_codec *tfa98xx_codec_ptr;
-#include "tfa9891_genregs.h"
+#define TFA98XX_AUDIO_CTR                  0x06
 #define TO_FIXED(e) e
 static ssize_t speaker_gain_show(struct kobject *kobj,
 		struct kobj_attribute *attr, char *buf)
@@ -13842,18 +13873,19 @@ static ssize_t speaker_gain_store(struct kobject *kobj,
 		struct kobj_attribute *attr, const char *buf, size_t count)
 {
 	int input;
-	u16 value = 0;
+	int value;
 	int volume_value;
 
 	sscanf(buf, "%d", &input);
-	if (input < 0 || input > 127)
-		input = 0;
+	if (input < -20)
+		input = -20;
+	else if (input > 15)
+		input = 15;
 
-	value = snd_soc_read(tfa98xx_codec_ptr, TFA98XX_AUDIO_CTR);
-	volume_value = 2 * input;
-	if (volume_value > 255)
-		volume_value = 255;
-	value = (value & 0x00FF) | (u16)(volume_value << 8);
+	volume_value = snd_soc_read(tfa98xx_codec_ptr, TFA98XX_AUDIO_CTR);
+
+	value = volume_value - input;
+	value = (value << 8) + (volume_value & 0x00FF);
 
 	snd_soc_write(tfa98xx_codec_ptr, TFA98XX_AUDIO_CTR, value);
 
@@ -13869,6 +13901,7 @@ static struct attribute *sound_control_attrs[] = {
 		&headphone_gain_attribute.attr,
 		&mic_gain_attribute.attr,
 		&speaker_gain_attribute.attr,
+		&enable_compander_attribute.attr,
 		NULL,
 };
 
