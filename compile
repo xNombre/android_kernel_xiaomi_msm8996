@@ -1,6 +1,7 @@
 #!/bin/bash
 
-TOOLCHAIN="../aarch64-xnombre-linux-android/bin/aarch64-xnombre-linux-android-"
+LOC=$(pwd)
+TOOLCHAIN="$LOC/aarch64-xnombre-linux-android/bin/aarch64-xnombre-linux-android-"
 ARCH=arm64
 DEFCONFIG=soda_gemini_defconfig
 KERNEL_IMAGE="Image.gz-dtb"
@@ -10,7 +11,7 @@ DATE=`date +%d%m%y*%H:%M`
 J=$(nproc)
 
 if [[ $1 == 'cfg' ]]; then
-	make O=$OUT ARCH=$ARCH -j$J CROSS_COMPILE=$TOOLCHAIN menuconfig KCONFIG_CONFIG=../arch/arm64/configs/$DEFCONFIG
+	make O=$OUT ARCH=$ARCH -j$J CROSS_COMPILE=$TOOLCHAIN menuconfig KCONFIG_CONFIG=$LOC/arch/arm64/configs/$DEFCONFIG
 	if ! [[ $2 == 'c' ]]; then
 		exit
 	fi
