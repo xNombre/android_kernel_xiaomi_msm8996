@@ -11,7 +11,6 @@
  *  option) any later version.
  *
  */
-#define DEBUG
 #define pr_fmt(fmt) "%s(): " fmt, __func__
 
 #include <linux/init.h>
@@ -218,7 +217,7 @@ static int lm48560_remove(struct snd_soc_codec *codec)
 	return 0;
 }
 
-static struct snd_soc_codec_driver soc_codec_dev_lm48560 = {
+static const struct snd_soc_codec_driver soc_codec_dev_lm48560 = {
 	.probe = lm48560_probe,
 	.remove = lm48560_remove,
 
@@ -278,7 +277,6 @@ static int lm48560_i2c_probe(struct i2c_client *i2c,
 		dev_info(&i2c->dev, "lm48560 shdn gpio %d\n", lm48560->shdn_gpio);
 	}
 
-
 	lm48560->regmap = devm_regmap_init_i2c(i2c, &lm48560_regmap_config);
 	if (IS_ERR(lm48560->regmap)) {
 		return PTR_ERR(lm48560->regmap);
@@ -310,7 +308,7 @@ static const struct i2c_device_id lm48560_id_table[] = {
 
 MODULE_DEVICE_TABLE(i2c, lm48560_id_table);
 
-static struct of_device_id of_lm48560_pa_match[] = {
+static const struct of_device_id of_lm48560_pa_match[] = {
 	{ .compatible = "ti,lm48560",},
 	{ },
 };

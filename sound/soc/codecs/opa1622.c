@@ -12,7 +12,6 @@
  *
  */
 
-#define DEBUG
 #include <linux/module.h>
 #include <linux/gpio.h>
 #include <linux/of_gpio.h>
@@ -116,7 +115,6 @@ static int opa1622_probe(struct snd_soc_codec *codec)
 		dev_err(codec->dev, "%s: Failed to alloc opa1622_priv\n", __func__);
 		return -ENOMEM;
 	}
-	memset(opa1622, 0, sizeof(struct opa1622_priv));
 
 	opa1622->enable_gpio = of_get_named_gpio(codec->dev->of_node,
 				"opa-en-gpio", 0);
@@ -212,7 +210,6 @@ enable_free:
 	gpio_free(opa1622->enable_gpio);
 opa1622_free:
 	kfree(opa1622);
-	opa1622 = NULL;
 	return ret;
 }
 
@@ -308,7 +305,7 @@ static const struct snd_soc_dapm_route opa1622_routes[] = {
 	{"OUT2", NULL, "PGA2"},
 };
 
-static struct snd_soc_codec_driver opa1622_drv = {
+static const struct snd_soc_codec_driver opa1622_drv = {
 	.probe = opa1622_probe,
 	.remove = opa1622_remove,
 	.dapm_widgets = opa1622_widgets,

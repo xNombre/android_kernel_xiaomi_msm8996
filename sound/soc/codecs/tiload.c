@@ -42,7 +42,7 @@
 #include "tiload.h"
 
 /* enable debug prints in the driver */
-#define DEBUG
+/* #define DEBUG */
 
 #ifdef DEBUG
 #define dprintk(x...)   printk(x)
@@ -61,7 +61,7 @@ static int tiload_major;	/* Dynamic allocation of Mjr No. */
 static int tiload_opened;	/* Dynamic allocation of Mjr No. */
 static struct tas2555_priv *g_TAS2555;
 struct class *tiload_class;
-static unsigned int magic_num = 0x00;
+static unsigned int magic_num;
 
 static char gPage;
 static char gBook;
@@ -124,7 +124,7 @@ static ssize_t tiload_read(struct file *file, char __user *buf,
 	size_t count, loff_t *offset)
 {
 	static char rd_data[MAX_LENGTH + 1];
-	unsigned int nCompositeRegister = 0, Value;
+	unsigned int nCompositeRegister = 0, Value = 0;
 	char reg_addr;
 	size_t size;
 	int ret = 0;
@@ -168,9 +168,9 @@ static ssize_t tiload_read(struct file *file, char __user *buf,
 		printk(KERN_ERR "rd_data[%d]=%x\n", i, rd_data[i]);
 	}
 #endif
-	if (size != count) {
+	/*if (size != count) {
 		printk("read %d registers from the codec\n", (int) size);
-	}
+	}*/
 
 	if (copy_to_user(buf, rd_data, size) != 0) {
 		dprintk("copy_to_user failed\n");
@@ -232,7 +232,7 @@ static ssize_t tiload_write(struct file *file, const char __user *buf,
 		pData++;
 		count--;
 	}
-#if 1
+
 	nCompositeRegister = BPR_REG(gBook, gPage, nRegister);
 	if (count == 2) {
 		ret =
@@ -246,13 +246,6 @@ static ssize_t tiload_write(struct file *file, const char __user *buf,
 	if (ret < 0)
 		printk("%s, %d, ret=%d, count=%zu, ERROR Happen\n", __FUNCTION__,
 			__LINE__, ret, count);
-#else
-	for (n = 1; n < count; n++) {
-		nCompositeRegister = BPR_REG(gBook, gPage, nRegister + n - 1);
-		g_codec->driver->write(g_codec, 0x80000000 | nCompositeRegister,
-			pData[n]);
-	}
-#endif
 
 	return size;
 }
@@ -310,7 +303,7 @@ static long tiload_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 }
 
 /*********** File operations structure for tiload *************/
-static struct file_operations tiload_fops = {
+static const struct file_operations tiload_fops = {
 	.owner = THIS_MODULE,
 	.open = tiload_open,
 	.release = tiload_release,
