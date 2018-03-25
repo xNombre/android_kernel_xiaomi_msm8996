@@ -13765,6 +13765,7 @@ static struct regulator *tasha_codec_find_ondemand_regulator(
 #ifdef CONFIG_SOUND_CONTROL
 static struct snd_soc_codec *sound_control_codec_ptr;
 bool enable_compander = 1;
+int speaker_gain = 0;
 
 static ssize_t enable_compander_show(struct kobject *kobj,
 		struct kobj_attribute *attr, char *buf)
@@ -13813,11 +13814,15 @@ static ssize_t headphone_gain_store(struct kobject *kobj,
 
 	sscanf(buf, "%d %d", &input_l, &input_r);
 
-	if (input_l < -84 || input_l > 20)
-		input_l = 0;
+	if (input_l < -20)
+		input_l = -20;
+	else if (input_l > 20)
+		input_l = 20;
 
-	if (input_r < -84 || input_r > 20)
-		input_r = 0;
+	if (input_r < -20)
+		input_r = -20;
+	else if (input_r > 20)
+		input_r = 20;
 
 	snd_soc_write(sound_control_codec_ptr, WCD9335_CDC_RX1_RX_VOL_MIX_CTL, input_l);
 	snd_soc_write(sound_control_codec_ptr, WCD9335_CDC_RX2_RX_VOL_MIX_CTL, input_r);
@@ -13846,8 +13851,10 @@ static ssize_t mic_gain_store(struct kobject *kobj,
 
 	sscanf(buf, "%d", &input);
 
-	if (input < -10 || input > 20)
-		input = 0;
+	if (input < -10)
+		input = -10;
+	else if (input > 20)
+		input = 20;
 
 	snd_soc_write(sound_control_codec_ptr, WCD9335_CDC_TX6_TX_VOL_CTL, input);
 	snd_soc_write(sound_control_codec_ptr, WCD9335_CDC_TX7_TX_VOL_CTL, input);
@@ -13866,14 +13873,7 @@ struct snd_soc_codec *tfa98xx_codec_ptr;
 static ssize_t speaker_gain_show(struct kobject *kobj,
 		struct kobj_attribute *attr, char *buf)
 {
-	u16 value;
-	s64 vol;
-
-	value = snd_soc_read(tfa98xx_codec_ptr, TFA98XX_AUDIO_CTR);
-	value >>= 8;
-	vol = TO_FIXED(value) / -2;
-
-	return snprintf(buf, PAGE_SIZE, "%d\n", (int)vol);
+	return snprintf(buf, PAGE_SIZE, "%d\n", speaker_gain);
 }
 
 static ssize_t speaker_gain_store(struct kobject *kobj,
@@ -13889,6 +13889,7 @@ static ssize_t speaker_gain_store(struct kobject *kobj,
 	else if (input > 15)
 		input = 15;
 
+	speaker_gain = input;
 	volume_value = snd_soc_read(tfa98xx_codec_ptr, TFA98XX_AUDIO_CTR);
 
 	value = volume_value - input;
