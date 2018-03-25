@@ -2234,7 +2234,12 @@ static void tfa98xx_interrupt_enable(struct tfa98xx *tfa98xx, bool enable)
  * Downloaded once only at module init
  * FIXME: may need to review that (one per instance of codec device?)
  */
+#ifdef CONFIG_MACH_XIAOMI_GEMINI
 static char *fw_name = "tfa98xx.cnt";
+#elif CONFIG_MACH_XIAOMI_LITHIUM
+static char *fw_name = "tfa9891.cnt";
+#endif
+
 module_param(fw_name, charp, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(fw_name, "TFA98xx DSP firmware (container file) name.");
 
