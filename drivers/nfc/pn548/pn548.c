@@ -200,7 +200,7 @@ static ssize_t pn548_dev_read(struct file *filp, char __user *buf,
 
 
 	if (((tmp[0] & 0xff) == 0x61) && ((tmp[1] & 0xff) == 0x07) && ((tmp[2] & 0xff) == 0x01))
-		wake_lock_timeout(&fieldon_wl, msecs_to_jiffies(3*1000));
+		wake_lock_timeout(&fieldon_wl, msecs_to_jiffies(1*1000));
 
 	if (ret < 0) {
 		pr_err("%s: PN548 i2c_master_recv returned %d\n", __func__, ret);
