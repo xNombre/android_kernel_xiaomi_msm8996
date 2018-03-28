@@ -486,7 +486,7 @@ static const struct i2c_device_id pericom_30216c_id_table[] = {
 };
 MODULE_DEVICE_TABLE(i2c, pericom_30216c_id_table);
 
-static struct of_device_id pericom_match_table[] = {
+static const struct of_device_id pericom_match_table[] = {
 	{ .compatible = "pericom,30216c",},
 	{ },
 };
