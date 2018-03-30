@@ -83,6 +83,11 @@ ui_print "Patch ramdisks..."
 
 # end ramdisk changes
 
+ui_print "Do Soda Magic..."
+  replace_file /system/media/bootanimation.zip 644 bootanim
+ui_print ""
+ui_print "All succeeded!"
+
 write_boot;
 
 ## end install
