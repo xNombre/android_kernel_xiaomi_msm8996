@@ -794,6 +794,14 @@ config MSM_PERFORMANCE_HOTPLUG_ON
 	  compile out the nodes needed for core-control functionality through
 	  msm_performance.
 
+config MSM_PERF_TOUCHBOOST
+	bool "Disable userspace cpu freq votes"
+	depends on MSM_PERFORMANCE
+	help
+	  An easy-to-use interface rejecting cpu freq votes from uerspace,
+	  these votes seems to be affecting battery life so it could be
+	  a great idea to just turn it off. 
+
 config MSM_POWER
 	tristate "Power driver to manage system resources"
 	help

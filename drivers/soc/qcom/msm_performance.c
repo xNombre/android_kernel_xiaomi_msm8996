@@ -162,6 +162,10 @@ static struct task_struct *notify_thread;
 
 static struct input_handler *handler;
 
+#ifdef CONFIG_MSM_PERF_TOUCHBOOST
+static bool touchboost = 0;
+#endif
+
 /* CPU workload detection related */
 #define NO_MODE		(0)
 #define SINGLE		(1)
@@ -365,6 +369,34 @@ static const struct kernel_param_ops param_ops_managed_online_cpus = {
 device_param_cb(managed_online_cpus, &param_ops_managed_online_cpus,
 							NULL, 0444);
 #endif
+
+#ifdef CONFIG_MSM_PERF_TOUCHBOOST
+static int set_touchboost(const char *buf, const struct kernel_param *kp)
+{
+	int val;
+
+	if (sscanf(buf, "%d\n", &val) != 1)
+		return -EINVAL;
+	if(val && val != 1)
+		return -EINVAL;
+
+	touchboost = val;
+
+	return 0;
+}
+
+static int get_touchboost(char *buf, const struct kernel_param *kp)
+{
+	return snprintf(buf, PAGE_SIZE, "%d", touchboost);
+}
+
+static const struct kernel_param_ops param_ops_touchboost = {
+	.set = set_touchboost,
+	.get = get_touchboost,
+};
+device_param_cb(touchboost, &param_ops_touchboost, NULL, 0644);
+#endif
+
 /*
  * Userspace sends cpu#:min_freq_value to vote for min_freq_value as the new
  * scaling_min. To withdraw its vote it needs to enter cpu#:0
@@ -378,6 +410,11 @@ static int set_cpu_min_freq(const char *buf, const struct kernel_param *kp)
 	struct cpufreq_policy policy;
 	cpumask_var_t limit_mask;
 	int ret;
+
+#ifdef CONFIG_MSM_PERF_TOUCHBOOST
+	if(!touchboost)
+		return 0;
+#endif
 
 	while ((cp = strpbrk(cp + 1, " :")))
 		ntokens++;
@@ -461,6 +498,11 @@ static int set_cpu_max_freq(const char *buf, const struct kernel_param *kp)
 	struct cpufreq_policy policy;
 	cpumask_var_t limit_mask;
 	int ret;
+
+#ifdef CONFIG_MSM_PERF_TOUCHBOOST
+	if(!touchboost)
+		return 0;
+#endif
 
 	while ((cp = strpbrk(cp + 1, " :")))
 		ntokens++;
