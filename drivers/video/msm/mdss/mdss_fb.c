@@ -99,8 +99,6 @@ bool backlight_dimmer = false;
 int backlight_min = 1;
 int backlight_max = 4095;
 module_param(backlight_dimmer, bool, 0644);
-module_param(backlight_min, int, 0644);
-module_param(backlight_max, int, 0644);
 
 static struct fb_info *fbi_list[MAX_FBI_LIST];
 static int fbi_list_index;
@@ -295,6 +293,60 @@ static int mdss_fb_notify_update(struct msm_fb_data_type *mfd,
 
 static int lcd_backlight_registered;
 
+static int set_min_brightness(const char *buf, const struct kernel_param *kp)
+{
+       int val;
+
+       if (sscanf(buf, "%d\n", &val) != 1)
+              return -EINVAL;
+	if (backlight_min < 1)
+		backlight_min = 1;
+	if (backlight_min > 4095)
+		backlight_min = 4095;
+
+       backlight_min = val;
+
+       return 0;
+}
+
+static int get_min_brightness(char *buf, const struct kernel_param *kp)
+{
+       return snprintf(buf, PAGE_SIZE, "%d", backlight_min);
+}
+
+static const struct kernel_param_ops param_ops_backlight_min = {
+       .set = set_min_brightness,
+       .get = get_min_brightness,
+};
+device_param_cb(backlight_min, &param_ops_backlight_min, NULL, 0644);
+
+static int set_max_brightness(const char *buf, const struct kernel_param *kp)
+{
+       int val;
+
+       if (sscanf(buf, "%d\n", &val) != 1)
+              return -EINVAL;
+	if (backlight_max < 1)
+		backlight_max = 1;
+	if (backlight_max > 4095)
+		backlight_max = 4095;
+
+       backlight_max = val;
+
+       return 0;
+}
+
+static int get_max_brightness(char *buf, const struct kernel_param *kp)
+{
+       return snprintf(buf, PAGE_SIZE, "%d", backlight_max);
+}
+
+static const struct kernel_param_ops param_ops_backlight_max = {
+       .set = set_max_brightness,
+       .get = get_max_brightness,
+};
+device_param_cb(backlight_max, &param_ops_backlight_max, NULL, 0644);
+
 static void mdss_fb_set_bl_brightness(struct led_classdev *led_cdev,
 				      enum led_brightness value)
 {
@@ -310,27 +362,23 @@ static void mdss_fb_set_bl_brightness(struct led_classdev *led_cdev,
 		value = mfd->panel_info->brightness_max;
 
 	if (backlight_dimmer) {
-		MDSS_BRIGHT_TO_BL_DIM(bl_lvl, value);
+		if (value)
+		{
+			MDSS_BRIGHT_TO_BL_DIM(bl_lvl, value);
+
+			/* set limits */
+			if (bl_lvl < backlight_min)
+				bl_lvl = backlight_min;
+			if (bl_lvl > backlight_max)
+				bl_lvl = backlight_max;
+		}
+		else
+			bl_lvl = 0;
 	} else {
 		/* This maps android backlight level 0 to 255 into
 	 	  driver backlight level 0 to bl_max with rounding */
 		MDSS_BRIGHT_TO_BL(bl_lvl, value, mfd->panel_info->bl_max,
 				mfd->panel_info->brightness_max);
-	}
-
-	if (bl_lvl != 0)
-	{
-		/* sanitize */
-		if (backlight_min < 1)
-			backlight_min = 1;
-		if (backlight_max > 4095)
-			backlight_max= 4095;
-
-		/* set limits */
-		if (bl_lvl < backlight_min)
-			bl_lvl = backlight_min;
-		if (bl_lvl > backlight_max)
-			bl_lvl = backlight_max;
 	}
 
 	if (!bl_lvl && value)
