@@ -68,7 +68,7 @@ ADJ_STS func_PROGRAM_DOWNLOAD(void)
 
 		u16_dat = I2C_OIS_mem__read(_M_FIRMVER);
 
-		printk("%s: ADJ_OK\n", __func__);
+		pr_debug("%s: ADJ_OK\n", __func__);
 		return ADJ_OK;
 	} else {
 		printk("%s: ADJ_DL_ERR\n", __func__);
