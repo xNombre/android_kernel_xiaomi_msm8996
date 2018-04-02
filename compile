@@ -6,7 +6,7 @@ ARCH=arm64
 DEFCONFIG=soda_gemini_defconfig
 KERNEL_IMAGE="Image.gz-dtb"
 NAME=TheSodaKernel
-OUT=out_soda
+OUT=/media/andrzej/LOS/gemini_out
 DATE=`date +%d%m%y*%H:%M`
 J=$(nproc)
 
