@@ -1,0 +1,53 @@
+[MONITOR-CLUSTER1]
+algo_type monitor
+sampling 250
+sensor tsens_tz_sensor8 tsens_tz_sensor11 tsens_tz_sensor5
+thresholds     20000    25000    30000    35000    40000    45000    50000    55000    60000    65000    70000    75000    80000    85000    90000
+thresholds_clr 15000    20000    25000    30000    35000    40000    45000    50000    55000    60000    65000    70000    75000    80000    85000 
+actions        cluster1 cluster1 cluster1 cluster1 cluster1 cluster1 cluster1 cluster1 cluster1 cluster1 cluster1 cluster1 cluster1 cluster1 cluster1+s_shutdown
+action_info    2150400  2150400  2150400  2150400  2150400  2150400  2150400  2073600  1996800  1996800  1113600  1113600  1113600  1036800   940800+5
+
+[MONITOR-CLUSTER0]
+algo_type monitor
+sampling 250
+sensor tsens_tz_sensor8 tsens_tz_sensor11 tsens_tz_sensor5
+thresholds     20000    25000    30000    35000    40000    45000    50000    55000    60000    65000    70000    75000    80000    85000    90000
+thresholds_clr 15000    20000    25000    30000    35000    40000    45000    50000    55000    60000    65000    70000    75000    80000    85000
+actions        cluster0 cluster0 cluster0 cluster0 cluster0 cluster0 cluster0 cluster0 cluster0 cluster0 cluster0 cluster0 cluster0 cluster0 cluster0+s_shutdown
+action_info    1593600  1593600  1593600  1593600  1593600  1593600  1593600  1478400  1401600  1113600  1113600  1113600  1113600  960000  960000+5
+
+[MONITOR-GPU]
+algo_type monitor
+sampling 250
+sensor tsens_tz_sensor10 tsens_tz_sensor16 tsens_tz_sensor20
+thresholds     20000     25000     30000     35000     40000     45000     50000     55000     60000     65000     70000     75000     80000     85000     90000
+thresholds_clr 15000     20000     25000     30000     35000     40000     45000     50000     55000     60000     65000     70000     75000     80000     85000
+actions        gpu       gpu       gpu       gpu       gpu       gpu       gpu       gpu       gpu       gpu       gpu       gpu       gpu       gpu       gpu+s_shutdown
+action_info    624000000 624000000 624000000 624000000 624000000 624000000 624000000 560000000 560000000 560000000 510000000 510000000 510000000 510000000 510000000+5
+
+[MONITOR.S_CAM-Step]
+algo_type monitor
+sensor tsens_tz_sensor18
+sampling 250
+thresholds     18000 23000 28000 33000 38000
+thresholds_clr 16000 22500 26000 32500 36000	
+actions        s_cam s_cam s_cam s_cam s_cam
+action_info    0     1     2     5     6
+
+[BATTERY_MONITOR]
+algo_type monitor
+sensor bms
+sampling 250
+thresholds     32000   37000   40000  50000
+thresholds_clr 30000   35000   38000  0
+actions        battery battery report battery+s_shutdown
+action_info    0       2       3      13+5
+
+[SKIN-SS-CPUS-ALL-1]
+algo_type ss
+sampling 250
+sensor tsens_tz_sensor19
+device cpu_voltage
+set_point 45000
+set_point_clr 40000
+time_constant 0

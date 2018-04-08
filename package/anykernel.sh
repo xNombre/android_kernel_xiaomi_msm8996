@@ -40,9 +40,9 @@ dump_boot;
 
 #### init ####
 ui_print "Backup and clean ramdisks..."
-backup_file /vendor/etc/init/hw/init.qcom.rc;
-backup_file /vendor/etc/init/hw/init.qcom.power.rc;
-backup_file /vendor/etc/fstab.qcom;
+backup_file /vendor/etc/thermal-engine-8996.conf
+backup_file /vendor/etc/thermal-engine-8996-lite.conf
+backup_file /system/media/bootanimation.zip
 remove_line /vendor/etc/init/hw/init.qcom.rc "import soda.tweaks.rc"
 remove_line /vendor/etc/init/hw/init.qcom.power.rc "trigger tweak-soda"
 
@@ -85,7 +85,9 @@ ui_print "Patch ramdisks..."
 
 ui_print "Do Soda Magic..."
   replace_file /system/media/bootanimation.zip 644 bootanim
-ui_print ""
+ui_print "Push modified thermal configs..."
+  replace_file /vendor/etc/thermal-engine-8996.conf 644 thermal
+  replace_file /vendor/etc/thermal-engine-8996-lite.conf 644 thermal
 ui_print "All succeeded!"
 
 write_boot;
