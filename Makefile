@@ -4,6 +4,10 @@ SUBLEVEL = 71
 EXTRAVERSION =
 NAME = Diseased Newt
 
+# Soda Version
+SODA_VERSION = 0.1
+export SODA_VERSION
+
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
 # More info can be located in ./README

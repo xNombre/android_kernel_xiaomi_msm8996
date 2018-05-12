@@ -2,6 +2,9 @@
 # Makefile for the linux kernel.
 #
 
+EXTRA_CFLAGS += -DSODA_VERSION=$(SODA_VERSION)
+unexport SODA_VERSION
+
 obj-y                          := main.o version.o mounts.o
 obj-y                          += noinitramfs.o
 obj-$(CONFIG_BLK_DEV_INITRD)   += initramfs.o
