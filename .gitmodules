@@ -1,0 +1,3 @@
+[submodule "aarch64-xnombre-linux-android"]
+	path = aarch64-xnombre-linux-android
+	url = https://github.com/xNombre/aarch64-xnombre-linux-android.git
