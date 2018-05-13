@@ -38,6 +38,24 @@ struct ion_cma_buffer_info {
 };
 
 static int cma_heap_has_outer_cache;
+/*
+ * Create scatter-list for the already allocated DMA buffer.
+ * This function could be replace by dma_common_get_sgtable
+ * as soon as it will avalaible.
+ */
+static int ion_cma_get_sgtable(struct device *dev, struct sg_table *sgt,
+			       void *cpu_addr, dma_addr_t handle, size_t size)
+{
+	struct page *page = pfn_to_page(PFN_DOWN(handle));
+	int ret;
+
+	ret = sg_alloc_table(sgt, 1, GFP_KERNEL);
+	if (unlikely(ret))
+		return ret;
+
+	sg_set_page(sgt->sgl, page, PAGE_ALIGN(size), 0);
+	return 0;
+}
 
 /* ION CMA heap operations functions */
 static int ion_cma_allocate(struct ion_heap *heap, struct ion_buffer *buffer,
@@ -71,7 +89,7 @@ static int ion_cma_allocate(struct ion_heap *heap, struct ion_buffer *buffer,
 
 	info->is_cached = ION_IS_CACHED(flags);
 
-	dma_get_sgtable(dev,
+	ion_cma_get_sgtable(dev,
 			info->table, info->cpu_addr, info->handle, len);
 
 	/* keep this for memory release */
