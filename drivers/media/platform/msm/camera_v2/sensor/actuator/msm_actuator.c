@@ -836,6 +836,8 @@ static int32_t msm_actuator_bivcm_move_focus(
 	return rc;
 }
 
+#define MIN_LENS_PARK 20000
+#define MAX_LENS_PARK 22000
 static int32_t msm_actuator_park_lens(struct msm_actuator_ctrl_t *a_ctrl)
 {
 	int32_t rc = 0;
@@ -905,7 +907,7 @@ static int32_t msm_actuator_park_lens(struct msm_actuator_ctrl_t *a_ctrl)
 			}
 			a_ctrl->i2c_tbl_index = 0;
 			/* Use typical damping time delay to avoid tick sound */
-			usleep_range(10000, 12000);
+			usleep_range(MIN_LENS_PARK, MAX_LENS_PARK);
 		}
 		while (next_lens_pos < a_ctrl->step_position_table[a_ctrl->total_steps] * 110 / 100) {
 			if ((a_ctrl->step_position_table[a_ctrl->total_steps] * 110 / 100 - next_lens_pos)
@@ -938,7 +940,7 @@ static int32_t msm_actuator_park_lens(struct msm_actuator_ctrl_t *a_ctrl)
 			}
 			a_ctrl->i2c_tbl_index = 0;
 			/* Use typical damping time delay to avoid tick sound */
-			usleep_range(10000, 12000);
+			usleep_range(MIN_LENS_PARK, MAX_LENS_PARK);
 		}
 	} else {
 		while (next_lens_pos) {
@@ -982,7 +984,7 @@ static int32_t msm_actuator_park_lens(struct msm_actuator_ctrl_t *a_ctrl)
 			}
 			a_ctrl->i2c_tbl_index = 0;
 			/* Use typical damping time delay to avoid tick sound */
-			usleep_range(10000, 12000);
+			usleep_range(MIN_LENS_PARK, MAX_LENS_PARK);
 		}
 	}
 
