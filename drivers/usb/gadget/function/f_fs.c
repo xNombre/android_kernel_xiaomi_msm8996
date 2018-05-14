@@ -1005,7 +1005,7 @@ error:
 	if (data_len > epfile->buf_len || io_data->aio)
 		kfree(data);
 	if (ret < 0)
-		pr_err_ratelimited("Error: returning %zd value\n", ret);
+		pr_debug("Error: returning %zd value\n", ret);
 	return ret;
 }
 
