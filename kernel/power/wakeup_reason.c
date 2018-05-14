@@ -438,6 +438,7 @@ bool log_possible_wakeup_reason(int irq,
 
 #endif /* CONFIG_DEDUCE_WAKEUP_REASONS */
 
+#if 0
 void log_suspend_abort_reason(const char *fmt, ...)
 {
 	va_list args;
@@ -457,6 +458,12 @@ void log_suspend_abort_reason(const char *fmt, ...)
 
 	spin_unlock(&resume_reason_lock);
 }
+#else
+void log_suspend_abort_reason(const char *fmt, ...)
+{
+	return;
+}
+#endif
 
 static bool match_node(struct wakeup_irq_node *n, void *_p)
 {
