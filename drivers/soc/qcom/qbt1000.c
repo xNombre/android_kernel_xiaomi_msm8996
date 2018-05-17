@@ -115,6 +115,12 @@ static int get_cmd_rsp_buffers(struct qseecom_handle *hdl,
 	if ((aligned_rsp_len + aligned_cmd_len) > (uint64_t)g_app_buf_size)
 		return -ENOMEM;
 
+	if (!hdl->sbuf) {
+		dev_err(drvdata->dev, "%s: Null command buffer\n",
+			__func__);
+		return -EINVAL;
+	}
+
 	*cmd = hdl->sbuf;
 	*cmd_len = aligned_cmd_len;
 	*rsp = hdl->sbuf + *cmd_len;
@@ -940,13 +946,6 @@ static long qbt1000_ioctl(struct file *file, unsigned cmd, unsigned long arg)
 			&aligned_rsp_len);
 		if (rc != 0)
 			goto end;
-
-		if (!aligned_cmd) {
-			dev_err(drvdata->dev, "%s: Null command buffer\n",
-				__func__);
-			rc = -EINVAL;
-			goto end;
-		}
 
 		rc = copy_from_user(aligned_cmd, (void __user *)tzcmd.req_buf,
 				tzcmd.req_buf_len);
