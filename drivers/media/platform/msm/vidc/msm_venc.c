@@ -1555,32 +1555,33 @@ static void msm_venc_update_plane_count(struct msm_vidc_inst *inst, int type)
 	ctrl = v4l2_ctrl_find(&inst->ctrl_handler,
 		V4L2_CID_MPEG_VIDC_VIDEO_EXTRADATA);
 
-	if (ctrl)
+	if (ctrl) {
 		extradata = v4l2_ctrl_g_ctrl(ctrl);
 
-	if (type == CAPTURE_PORT) {
-		switch (extradata) {
-		case V4L2_MPEG_VIDC_EXTRADATA_MULTISLICE_INFO:
-		case V4L2_MPEG_VIDC_EXTRADATA_NUM_CONCEALED_MB:
-		case V4L2_MPEG_VIDC_EXTRADATA_METADATA_FILLER:
-		case V4L2_MPEG_VIDC_EXTRADATA_LTR:
-		case V4L2_MPEG_VIDC_EXTRADATA_METADATA_MBI:
-			inst->fmts[CAPTURE_PORT].num_planes = 2;
-		default:
-			break;
-		}
-	} else if (type == OUTPUT_PORT) {
-		switch (extradata) {
-		case V4L2_MPEG_VIDC_EXTRADATA_INPUT_CROP:
-		case V4L2_MPEG_VIDC_EXTRADATA_DIGITAL_ZOOM:
-		case V4L2_MPEG_VIDC_EXTRADATA_ASPECT_RATIO:
-		case V4L2_MPEG_VIDC_EXTRADATA_YUV_STATS:
-		case V4L2_MPEG_VIDC_EXTRADATA_ROI_QP:
-		case V4L2_MPEG_VIDC_EXTRADATA_PQ_INFO:
-			inst->fmts[OUTPUT_PORT].num_planes = 2;
-			break;
-		default:
-			break;
+		if (type == CAPTURE_PORT) {
+			switch (extradata) {
+			case V4L2_MPEG_VIDC_EXTRADATA_MULTISLICE_INFO:
+			case V4L2_MPEG_VIDC_EXTRADATA_NUM_CONCEALED_MB:
+			case V4L2_MPEG_VIDC_EXTRADATA_METADATA_FILLER:
+			case V4L2_MPEG_VIDC_EXTRADATA_LTR:
+			case V4L2_MPEG_VIDC_EXTRADATA_METADATA_MBI:
+				inst->fmts[CAPTURE_PORT].num_planes = 2;
+			default:
+				break;
+			}
+		} else if (type == OUTPUT_PORT) {
+			switch (extradata) {
+			case V4L2_MPEG_VIDC_EXTRADATA_INPUT_CROP:
+			case V4L2_MPEG_VIDC_EXTRADATA_DIGITAL_ZOOM:
+			case V4L2_MPEG_VIDC_EXTRADATA_ASPECT_RATIO:
+			case V4L2_MPEG_VIDC_EXTRADATA_YUV_STATS:
+			case V4L2_MPEG_VIDC_EXTRADATA_ROI_QP:
+			case V4L2_MPEG_VIDC_EXTRADATA_PQ_INFO:
+				inst->fmts[OUTPUT_PORT].num_planes = 2;
+				break;
+			default:
+				break;
+			}
 		}
 	}
 }
