@@ -6148,7 +6148,7 @@ static int synaptics_rmi4_pm_suspend(struct device *dev)
 	if (device_may_wakeup(dev) &&
 			rmi4_data->wakeup_en &&
 			!bdata->cut_off_power) {
-		dev_info(rmi4_data->pdev->dev.parent,
+		dev_dbg(rmi4_data->pdev->dev.parent,
 			"Enable touch irq wake\n");
 		disable_irq(rmi4_data->irq);
 		enable_irq_wake(rmi4_data->irq);
@@ -6167,7 +6167,7 @@ static int synaptics_rmi4_pm_resume(struct device *dev)
 	if (device_may_wakeup(dev) &&
 			rmi4_data->wakeup_en &&
 			!bdata->cut_off_power) {
-		dev_info(rmi4_data->pdev->dev.parent,
+		dev_dbg(rmi4_data->pdev->dev.parent,
 			"Disable touch irq wake\n");
 		disable_irq_wake(rmi4_data->irq);
 		enable_irq(rmi4_data->irq);
