@@ -288,7 +288,7 @@ static void ft5x46_charger_state_changed(struct ft5x46_data *ft5x46)
 	is_usb_exist = power_supply_is_system_supplied();
 	if ((is_usb_exist != ft5x46->is_usb_plug_in) || (ft5x46->force_update_noise_filter)) {
 		ft5x46->is_usb_plug_in = is_usb_exist;
-		dev_info(ft5x46->dev, "Power state changed, set noise filter to 0x%x\n", is_usb_exist);
+		dev_dbg(ft5x46->dev, "Power state changed, set noise filter to 0x%x\n", is_usb_exist);
 		mutex_lock(&ft5x46->mutex);
 		ft5x46_write_byte(ft5x46, FT5X0X_NOISE_FILTER, is_usb_exist);
 		mutex_unlock(&ft5x46->mutex);
@@ -300,7 +300,7 @@ static void ft5x46_noise_filter_delayed_work(struct work_struct *work)
 	struct delayed_work *delayed_work = to_delayed_work(work);
 	struct ft5x46_data *ft5x46 = container_of(delayed_work, struct ft5x46_data, noise_filter_delayed_work);
 
-	dev_info(ft5x46->dev, "ft5x46_noise_filter_delayed_work called\n");
+	dev_dbg(ft5x46->dev, "ft5x46_noise_filter_delayed_work called\n");
 	ft5x46_charger_state_changed(ft5x46);
 }
 
@@ -1886,7 +1886,7 @@ static int ft5x46_input_disable(struct input_dev *in_dev)
 {
 	struct ft5x46_data *ft5x46 = input_get_drvdata(in_dev);
 
-	dev_info(ft5x46->dev, "ft5x46 disable!\n");
+	dev_dbg(ft5x46->dev, "ft5x46 disable!\n");
 	ft5x46_suspend(ft5x46);
 
 	return 0;

@@ -3147,6 +3147,7 @@ void HIFIpaGetCEResource(HIF_DEVICE *hif_device,
  *
  * Return: void
  */
+#if 0
 void hif_pci_runtime_pm_warn(struct hif_pci_softc *sc, const char *msg)
 {
 	struct hif_pm_runtime_context *ctx;
@@ -3197,7 +3198,11 @@ void hif_pci_runtime_pm_warn(struct hif_pci_softc *sc, const char *msg)
 	pr_warn("\n");
 	WARN_ON(1);
 }
-
+#else
+inline void hif_pci_runtime_pm_warn(struct hif_pci_softc *sc, const char *msg)
+{
+}
+#endif
 int hif_pm_runtime_get(HIF_DEVICE *hif_device)
 {
 	struct HIF_CE_state *hif_state = (struct HIF_CE_state *)hif_device;
