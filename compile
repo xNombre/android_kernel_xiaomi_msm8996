@@ -32,7 +32,9 @@ make O=$OUT ARCH=$ARCH -j$J CROSS_COMPILE="ccache $TOOLCHAIN"
 if [ -e $OUT/arch/$ARCH/boot/$KERNEL_IMAGE ]; then
 cp $OUT/arch/$ARCH/boot/$KERNEL_IMAGE package/zImage
 cd package
+sed -i "s/dummy-device/${DEVICE}/g" anykernel.sh
 zip -r9 ../compiled/$NAME-$DATE.zip * 
+sed -i "s/${DEVICE}/dummy-device/g" anykernel.sh
 else
 echo 'No boot image!'
 fi
